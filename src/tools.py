@@ -9,10 +9,13 @@ import glob
 global logger 
 
 # create logger
-head, tail = os.path.split(__file__)
-logging.config.fileConfig(os.path.join(head,'logging.conf'))
-logger = logging.getLogger('SMT')
+def init_logger(): 
+    head,_ = os.path.split(__file__)
+    logging.config.fileConfig(os.path.join(head,'logging.conf'))
+    logger = logging.getLogger('SMT')
+    return logger
 
+logger = init_logger()
 
 def copy(src, trgt):
     """Recursive copy function from source location to target location"""
@@ -49,4 +52,10 @@ def guaranteedir(mydir):
         if not os.path.isdir(mydir):
             logging.error('Cannot create subdirectory ' + mydir)
 
+def logger_assert(condition, error_message):
+    try:
+        assert(condition)
+    except AssertionError as err:
+        logger.error(error_message)
+        raise err
 
