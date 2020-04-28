@@ -148,7 +148,7 @@ def adapt(model_settings, smt_settings):
             if (tail.find('.template') > 0) and not (head.find('source') > -1): 
                 filename = tail.replace('.template','')
                 file_head, file_ext = os.path.splitext(filename)
-                if not file_ext == '.mdu': 
+                if file_ext not in smt_settings['application']['input']: 
                     filename_new = ''.join([file_head, model_settings['FileAppendix'], file_ext])
                 else:
                     filename_new = filename
