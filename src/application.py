@@ -1,14 +1,16 @@
 """Module containing Application Class"""
 
+#load libraries
 import os
-import logging
-import logging.config
 from subprocess import call
 
+#load modules
+import tools 
+
+global logger 
+
 # create logger
-head, tail = os.path.split(__file__)
-logging.config.fileConfig(os.path.join(head,'logging.conf'))
-logger = logging.getLogger('SMT')
+logger = tools.init_logger()
 
 class Application():
     """Class for Application"""
