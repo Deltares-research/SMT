@@ -55,7 +55,7 @@ def runner(settings):
    
         # run model
         app = Application(run_script=smt_settings['application']['command'])
-        app.run('work', 'simplechannel.mdu')
+        app.run('work', smt_settings['model'])
 
         # finalize model 
         tools.guaranteedir('work')
