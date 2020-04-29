@@ -21,6 +21,9 @@ def read(settings):
         smt_settings = yaml.load(open(settings, 'r'))
     except yaml.YAMLError as exc:
         logging.error(f'Error in SMT settings file: {exc}')
+        logger.info('')
+        logger.info(f'Parsed settings file: {settings}\n#---start of file ---\n {yaml.dump(smt_settings)}#---end of file ---')
+        raise exc
 
     logger.info('')
     logger.info(f'Parsed settings file: {settings}\n#---start of file ---\n {yaml.dump(smt_settings)}#---end of file ---')
@@ -50,43 +53,52 @@ def validate(smt_settings):
     # TODO: Assertion checks for cyclic definitions
     #logger.info('')
 
+    simulation_types = ['quasi-steady-hydrograph']
+    tools.logger_assert(smt_settings['model']['simulation_type'] in simulation_types, f'simulation_type should be one of {simulation_types}')
+
+
     #logger.critical('ending here')
     #sys.exit(0)
 
 def set_input(smt_settings, time_index):
+    smt_user = smt_settings['variables']['user']
     user_vars = []
-    for var in smt_settings['user']: 
+    for var in smt_user: 
         user_vars.append(var)
 
-    dependance_map = {} 
-    model_settings = {}
-    for key in user_vars: 
-        value = smt_settings['user'][key]
-        if key in list(model_settings.keys()):
-            continue
-        if type(value) == dict: 
-            if 'TimeDuration' in value.keys():
-                try: 
-                    value = list(smt_settings['user'][key]['TimeDuration'][time_index].keys())[0]
-                    model_settings['TimeDuration'] = value
-                    value = smt_settings['user'][key]['TimeDuration'][time_index][model_settings['TimeDuration']]
-                    model_settings[key] = value
-                    dependance_map['TimeDuration'] = ''
-                except IndexError:
-                    model_settings = None
-                    return model_settings
-            else:     
-                try: 
-                    value = smt_settings['user'][key][list(value.keys())[0]][model_settings[list(value.keys())[0]]]
-                    model_settings[key] = value 
-                    dependance_map[key] = list(smt_settings['user'][key].keys())[0]
-                except KeyError:
-                    user_vars.append(key)
-        else: 
-            model_settings[key] = value
-            dependance_map[key] = ''
+    if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
+        dependance_map = {} 
+        model_settings = {}
+        for key in user_vars: 
+            value = smt_user[key]
+            if key in list(model_settings.keys()):
+                continue
+            if type(value) == dict: 
+                if 'TimeDuration' in value.keys():
+                    try: 
+                        value = list(smt_user[key]['TimeDuration'][time_index].keys())[0]
+                        model_settings['TimeDuration'] = value
+                        value = smt_user[key]['TimeDuration'][time_index][model_settings['TimeDuration']]
+                        model_settings[key] = value
+                        dependance_map['TimeDuration'] = ''
+                    except IndexError:
+                        model_settings = None
+                        return model_settings
+                else:     
+                    try: 
+                        value = smt_user[key][list(value.keys())[0]][model_settings[list(value.keys())[0]]]
+                        model_settings[key] = value 
+                        dependance_map[key] = list(smt_user[key].keys())[0]
+                    except KeyError:
+                        user_vars.append(key)
+            else: 
+                model_settings[key] = value
+                dependance_map[key] = ''
+    else: 
+        logger.error('simulation_type not implemented')
+        raise NotImplementedError
 
-    reserved_keys = list(smt_settings['automatic'].keys())
+    reserved_keys = list(smt_settings['variables']['automatic'].keys())
     
     filename_settings = model_settings.copy()
     for key in reserved_keys: 
@@ -99,10 +111,6 @@ def set_input(smt_settings, time_index):
             # ignore constant values and TimeDuration
             filename_settings.pop(key, None)
             
-    
-    #if dependance_map
-    #    filename_settings.pop(key, None)
-
     file_append = '_' + '_'.join(str(k) for k in (filename_settings.values()))
     model_settings['FileAppendix'] = file_append
 
@@ -119,7 +127,7 @@ def get_input(smt_settings):
     time_start = 0
     model_settings = []
     while True and model_settings != None: 
-        model_settings = set_input(smt_settings['variables'], time_index)
+        model_settings = set_input(smt_settings, time_index)
 
         if model_settings != None: 
             logger.debug('Variables updated ...')
