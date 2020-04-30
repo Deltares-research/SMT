@@ -2,7 +2,7 @@
 
 #load libraries
 import os
-from subprocess import call
+from subprocess import run
 
 #load modules
 import tools 
@@ -34,6 +34,6 @@ class Application():
         """Running routine for Application Class"""
         os.chdir(workdir)
         print(' '.join([self.run_script, run_entry]))
-        call([self.run_script, run_entry])
+        run(['run_dflowfm.sh', '-v', '1.2.98.66318', run_entry]) #([self.run_script, run_entry])
         os.chdir('..')
 

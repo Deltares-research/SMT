@@ -19,10 +19,10 @@ def read(settings):
 
     try:
         smt_settings = yaml.load(open(settings, 'r'))
+        logger.info(f'Parsed settings file: {settings}\n#---start of file ---\n {yaml.dump(smt_settings)}#---end of file ---')
     except yaml.YAMLError as exc:
         logger.error(f'Error in SMT settings file: {exc}')
         logger.info('')
-        logger.info(f'Parsed settings file: {settings}\n#---start of file ---\n {yaml.dump(smt_settings)}#---end of file ---')
         raise exc
 
     logger.info('')
