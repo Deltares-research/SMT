@@ -20,7 +20,7 @@ def read(settings):
     try:
         smt_settings = yaml.load(open(settings, 'r'))
     except yaml.YAMLError as exc:
-        logging.error(f'Error in SMT settings file: {exc}')
+        logger.error(f'Error in SMT settings file: {exc}')
         logger.info('')
         logger.info(f'Parsed settings file: {settings}\n#---start of file ---\n {yaml.dump(smt_settings)}#---end of file ---')
         raise exc
@@ -51,14 +51,10 @@ def validate(smt_settings):
     logger.info('')
 
     # TODO: Assertion checks for cyclic definitions
-    #logger.info('')
 
+    # Assertion checks for simulation type
     simulation_types = ['quasi-steady-hydrograph']
     tools.logger_assert(smt_settings['model']['simulation_type'] in simulation_types, f'simulation_type should be one of {simulation_types}')
-
-
-    #logger.critical('ending here')
-    #sys.exit(0)
 
 def set_input(smt_settings, time_index):
     smt_user = smt_settings['variables']['user']
