@@ -33,7 +33,7 @@ def print_version(ctx, param, value):
 @click.option('-v', '--version', is_flag=True, callback=print_version,
               expose_value=False, is_eager=True, help='Print version information')
 @click.option('-s', '--settings', default='smt.yml', help='SMT settings YAML file')
-@click.option('-c', '--clean', is_flag=False, help='Indicates whether previous output should be cleaned')
+@click.option('-c', '--clean', is_flag=True, help='Indicates whether previous output should be cleaned')
 def runner(settings, clean): 
     # create logger
     logger = tools.init_logger()
@@ -59,19 +59,18 @@ def runner(settings, clean):
 
         # apply input 
         tools.guaranteedir('work')
-        tools.copy('source/*','work')
+        tools.copy('source','work')
         model.adapt(model_settings, smt_settings)
         tools.remove('work/**.template')
    
         # run model
         platform_system = platform.system()
-        app = Application(run_script=smt_settings['application'][platform_system]['command'])
-        app.run('work/', smt_settings['model']['input'])
+        app = Application(run_script=smt_settings['application']['command'][platform_system])
+        app.run('work', smt_settings['model']['input'])
 
         # finalize model 
         tools.guaranteedir('output')
-        tools.guaranteedir(new_output_folder)
-        tools.move('work/*', new_output_folder)
+        tools.move('work', new_output_folder)
 
 if __name__ == '__main__':
     runner()
