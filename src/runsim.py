@@ -1,6 +1,7 @@
 # load libraries 
 import click
 import logging
+import platform
 import os
 import sys 
 import yaml 
@@ -58,18 +59,19 @@ def runner(settings, clean):
 
         # apply input 
         tools.guaranteedir('work')
-        tools.copy('source','work')
+        tools.copy('source/*','work')
         model.adapt(model_settings, smt_settings)
         tools.remove('work/**.template')
    
         # run model
-        app = Application(run_script=smt_settings['application']['command'])
-        app.run('work', smt_settings['model']['input'])
+        platform_system = platform.system()
+        app = Application(run_script=smt_settings['application'][platform_system]['command'])
+        app.run('work/', smt_settings['model']['input'])
 
         # finalize model 
         tools.guaranteedir('output')
         tools.guaranteedir(new_output_folder)
-        tools.move('work', new_output_folder)
+        tools.move('work/*', new_output_folder)
 
 if __name__ == '__main__':
     runner()
