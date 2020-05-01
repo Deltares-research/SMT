@@ -165,21 +165,21 @@ def get_input(smt_settings):
     
             model_settings['TStart'] = time_start
             model_settings['TStop'] = time_start + model_settings['TimeDuration'] + model_settings['SpinupTime'] 
-            model_settings['MapInterval'] = model_settings['TimeDuration']
-            model_settings['RstInterval'] = model_settings['TimeDuration']
             if model_settings['TUnit'] == 'S':
-                #tunit_in_seconds = 1
+                tunit_in_seconds = 1
                 time_delta_start = timedelta(seconds = time_start)
             elif model_settings['TUnit'] == 'M':
-                #tunit_in_seconds = 60
+                tunit_in_seconds = 60
                 time_delta_start = timedelta(minutes = time_start)
             elif model_settings['TUnit'] == 'H':
-                #tunit_in_seconds = 3600
+                tunit_in_seconds = 3600
                 time_delta_start = timedelta(hours = time_start)
             elif model_settings['TUnit'] == 'D':
-                #tunit_in_seconds = 86400
+                tunit_in_seconds = 86400
                 time_delta_start = timedelta(days = time_start)
             refdate = datetime.strptime(model_settings['ReferenceDate'], '%Y%m%d')
+            model_settings['MapInterval'] = model_settings['TimeDuration']*tunit_in_seconds
+            model_settings['RstInterval'] = model_settings['TimeDuration']*tunit_in_seconds
 
             model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
             time_start = model_settings['TStop']
@@ -200,7 +200,11 @@ def adapt(model_settings, smt_settings):
                 filename = tail.replace('.template','')
                 file_head, file_ext = os.path.splitext(filename)
                 if file_ext not in smt_settings['application']['input']: 
-                    filename_new = ''.join([file_head, model_settings['FileAppendix'], file_ext])
+                    if file_ext == '.tim':
+                        # TODO: remove this special case
+                        filename_new = ''.join([file_head[:-5], model_settings['FileAppendix'], file_head[-5:]+file_ext])
+                    else: 
+                        filename_new = ''.join([file_head, model_settings['FileAppendix'], file_ext])
                 else:
                     filename_new = filename
                 full_filename_new = os.path.join(head,filename_new)
