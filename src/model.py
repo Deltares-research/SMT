@@ -6,6 +6,7 @@ from mako.template import Template
 from collections import OrderedDict
 import yaml
 import tools
+from datetime import datetime, timedelta
 
 global logger 
 
@@ -65,10 +66,15 @@ def set_input(smt_settings, time_index):
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         dependance_map = {} 
         model_settings = {}
+        prev_key = ''
         for key in user_vars: 
             value = smt_user[key]
             if key in list(model_settings.keys()):
+                prev_key = key
                 continue
+            if prev_key == key: 
+                logger.critical(f'Error setting variable: {key}')
+                raise KeyError
             if type(value) == dict: 
                 if 'TimeDuration' in value.keys():
                     try: 
@@ -87,9 +93,11 @@ def set_input(smt_settings, time_index):
                         dependance_map[key] = list(smt_user[key].keys())[0]
                     except KeyError:
                         user_vars.append(key)
+                        
             else: 
                 model_settings[key] = value
                 dependance_map[key] = ''
+            prev_key = key    
     else: 
         logger.error('simulation_type not implemented')
         raise NotImplementedError
@@ -109,6 +117,31 @@ def set_input(smt_settings, time_index):
             
     file_append = '_' + '_'.join(str(k) for k in (filename_settings.values()))
     model_settings['FileAppendix'] = file_append
+
+    if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
+        head, _ = os.path.splitext(smt_settings['model']['input'])
+        restart_file = f'{head}{file_append}_rst.nc'
+        model_settings['RestartFileName'] = restart_file
+        if os.path.exists(os.path.join('local_database',restart_file)):
+            logger.info('Restart file found in local_database')
+            model_settings['RestartFile'] = restart_file
+            model_settings['RestartFileLocation'] = os.path.join('local_database',restart_file)
+            restart_level = 0
+        else: 
+            logger.info('Restart file not found in local_database')
+            if os.path.exists(os.path.join('central_database',restart_file)):
+                logger.info('Restart file found in central_database')
+                model_settings['RestartFile'] = restart_file
+                model_settings['RestartFileLocation'] = os.path.join('central_database',restart_file)
+                restart_level = 1
+            else: 
+                logger.info('Restart file not found in central_database')
+                model_settings['RestartFile'] = ''
+                model_settings['RestartFileLocation'] = '' 
+                logger.info('Cold startup')
+                restart_level = 2
+        model_settings['RestartFileBackup'] = os.path.join('local_database',restart_file)
+        model_settings['SpinupTime'] = model_settings['SpinupTime'][restart_level]
 
         #try: 
         #except: 
@@ -131,10 +164,24 @@ def get_input(smt_settings):
                 logger.debug(f'{key}: {model_settings[key]}')
     
             model_settings['TStart'] = time_start
-            model_settings['TStop'] = time_start + model_settings['TimeDuration']
+            model_settings['TStop'] = time_start + model_settings['TimeDuration'] + model_settings['SpinupTime'] 
             model_settings['MapInterval'] = model_settings['TimeDuration']
             model_settings['RstInterval'] = model_settings['TimeDuration']
-        
+            if model_settings['TUnit'] == 'S':
+                #tunit_in_seconds = 1
+                time_delta_start = timedelta(seconds = time_start)
+            elif model_settings['TUnit'] == 'M':
+                #tunit_in_seconds = 60
+                time_delta_start = timedelta(minutes = time_start)
+            elif model_settings['TUnit'] == 'H':
+                #tunit_in_seconds = 3600
+                time_delta_start = timedelta(hours = time_start)
+            elif model_settings['TUnit'] == 'D':
+                #tunit_in_seconds = 86400
+                time_delta_start = timedelta(days = time_start)
+            refdate = datetime.strptime(model_settings['ReferenceDate'], '%Y%m%d')
+
+            model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
             time_start = model_settings['TStop']
 
             yield model_settings
@@ -164,3 +211,5 @@ def adapt(model_settings, smt_settings):
                     with open(full_filename_new, 'w') as f:                         
                         mytemplate = Template(filename=item, strict_undefined=True)
                         f.write(mytemplate.render(**model_settings).replace('\r',''))
+
+    tools.copy(model_settings['RestartFileLocation'],os.path.join('work',model_settings['RestartFile']))
