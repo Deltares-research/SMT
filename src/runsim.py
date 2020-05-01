@@ -1,10 +1,12 @@
 # load libraries 
 import click
 import logging
-import platform
-import os
 import glob 
+import mako
+import os
+import platform
 import sys 
+import netCDF4
 import yaml 
 import shutil
 
@@ -16,7 +18,6 @@ import shutil
 #load modules
 import tools
 import model
-import mako
 from application import Application
 
 # TODO: print module version info
@@ -28,6 +29,7 @@ def print_version(ctx, param, value):
     click.echo(f'click : {click.__version__}')
     click.echo(f'logging: {logging.__version__}')
     click.echo(f'mako: {mako.__version__}')  
+    click.echo(f'netCDF4: {netCDF4.__version__}')  
     click.echo(f'yaml: {yaml.__version__}')  
     ctx.exit()
 
@@ -81,7 +83,7 @@ def runner(settings, clean):
         # backup restart file 
         restart_file = [rst for rst in glob.glob('work**/**/**_rst.nc', recursive=True)][-1]
         #logger.info(f'Found {restart_file}')
-        tools.copy(restart_file,model_settings['RestartFileBackup'])
+        tools.copy(restart_file, model_settings['RestartFileBackup'])
         # finalize model 
         tools.guaranteedir('output')
         shutil.copytree('work', new_output_folder)
