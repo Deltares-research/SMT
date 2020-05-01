@@ -42,11 +42,12 @@ def remove(pattern):
     """Recursive delete function according to specified pattern"""
     logger.info('Removing ' + pattern)
     for name in glob.glob(pattern, recursive=True):
-        os.remove(name)
+        if os.path.exists(name):
+            os.remove(name)
 
 def guaranteedir(mydir):
     """Make a directory and exit if this is not possible"""
-    if not os.path.isdir(mydir):
+    if not os.path.exists(mydir):
         logger.info('Creating subdirectory ' + mydir + ' ...')
         os.mkdir(mydir)
         if not os.path.isdir(mydir):
