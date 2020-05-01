@@ -39,8 +39,9 @@ def print_version(ctx, param, value):
 @click.option('-v', '--version', is_flag=True, callback=print_version,
               expose_value=False, is_eager=True, help='Print version information')
 @click.option('-s', '--settings', default='smt.yml', help='SMT settings YAML file (default = smt.yml)')
-@click.option('-c', '--clean', is_flag=True, help='Flag indicating whether previous output should be cleaned')
-def runner(settings, clean): 
+@click.option('-c', '--clean', is_flag=True, help='Flag indicating whether previous output and local_database should be cleaned')
+@click.option('-b', '--backup', is_flag=True, help='Flag indicating whether central_database should be replaced by local_database')
+def runner(settings, clean, backup): 
     # create logger
     logger = tools.init_logger()
 
@@ -55,6 +56,9 @@ def runner(settings, clean):
         logger.info(f'Cleaning previous output')
         if os.path.exists('output'):
             shutil.rmtree('output')
+        logger.info(f'Removing local_database')
+        if os.path.exists('local_database'):
+            shutil.rmtree('local_database')
 
     tools.guaranteedir('central_database')
     tools.guaranteedir('local_database')
@@ -81,12 +85,20 @@ def runner(settings, clean):
 
         # model.finalize(model_settings, smt_settings)
         # backup restart file 
-        restart_file = [rst for rst in glob.glob('work**/**/**_rst.nc', recursive=True)][-1]
+        try: 
+            restart_file = [rst for rst in glob.glob('work**/**/**_rst.nc', recursive=True)][-1]
+        except: 
+            logger.error('Check .dia file')
+            logger.error('${RstInterval} may not be specified')
+            raise IndexError
         #logger.info(f'Found {restart_file}')
         tools.copy(restart_file, model_settings['RestartFileBackup'])
         # finalize model 
         tools.guaranteedir('output')
         shutil.copytree('work', new_output_folder)
+
+    if backup: 
+        shutil.copytree('local_database', 'central_database')
 
 if __name__ == '__main__':
     runner()
