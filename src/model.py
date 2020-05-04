@@ -7,6 +7,10 @@ from collections import OrderedDict
 import yaml
 import tools
 from datetime import datetime, timedelta
+import pandas as pd 
+from scipy.interpolate import LinearNDInterpolator
+import numpy as np
+import netCDF4
 
 global logger 
 
@@ -142,7 +146,7 @@ def set_input(smt_settings, time_index):
                 restart_level = 2
         model_settings['RestartFileBackup'] = os.path.join('local_database',restart_file)
         model_settings['SpinupTime'] = model_settings['SpinupTime'][restart_level]
-
+        model_settings['MorStt'] = model_settings['SpinupTime']
         #try: 
         #except: 
         #    logger.info(f'{key}: not set')
@@ -178,11 +182,15 @@ def get_input(smt_settings):
                 tunit_in_seconds = 86400
                 time_delta_start = timedelta(days = time_start)
             refdate = datetime.strptime(model_settings['ReferenceDate'], '%Y%m%d')
-            model_settings['MapInterval'] = model_settings['TimeDuration']*tunit_in_seconds
-            model_settings['RstInterval'] = model_settings['TimeDuration']*tunit_in_seconds
+            model_settings['MapInterval'] = (model_settings['TimeDuration'] + model_settings['SpinupTime'])*tunit_in_seconds
+            model_settings['RstInterval'] = (model_settings['TimeDuration'] + model_settings['SpinupTime'])*tunit_in_seconds
 
             model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
             time_start = model_settings['TStop']
+
+            if time_index > 0: 
+                if 'BedLevelFile' in model_settings.keys():
+                    model_settings['BedLevelFile'] = ''
 
             yield model_settings
 
@@ -216,4 +224,45 @@ def adapt(model_settings, smt_settings):
                         mytemplate = Template(filename=item, strict_undefined=True)
                         f.write(mytemplate.render(**model_settings).replace('\r',''))
 
-    tools.copy(model_settings['RestartFileLocation'],os.path.join('work',model_settings['RestartFile']))
+    if model_settings['RestartFileLocation'] != '': 
+        tools.copy(model_settings['RestartFileLocation'],os.path.join('work',model_settings['RestartFile']))
+        if 'BedLevelFile' in model_settings.keys():
+            if model_settings['BedLevelFile'] != '':
+                # read bed level from .xyz/.xyb file 
+                xyz = pd.read_csv(os.path.join('work',model_settings['BedLevelFile']),header=None,sep='\s+', engine='python', names = ['x','y','z'])
+                # make interpolator
+                interpolator = LinearNDInterpolator(xyz[['x','y']].values,xyz['z'].values)
+                
+                # load old restart file in work folder containing correct flow conditions
+                with netCDF4.Dataset(model_settings['RestartFileLocation'], 'r') as src:
+                    with netCDF4.Dataset(os.path.join('work',model_settings['RestartFile']), 'w') as dst:
+                        
+                        #TODO: Attributes
+                        for name, dimension in src.dimensions.items():
+                            dst.createDimension(name, len(dimension) if not dimension.isunlimited() else None)
+
+                        for name, variable in src.variables.items():
+                            if name in ['FlowElem_bl', 'mor_bl']: 
+                                # get interpolation location data
+                                xi=src.variables['FlowElem_xzw'][:].copy()
+                                yi=src.variables['FlowElem_yzw'][:].copy()
+                                xiyi = np.transpose(np.vstack([xi,yi]))
+                                zi = interpolator(xiyi)
+                                x = dst.createVariable(name, variable.datatype, variable.dimensions)
+                                dst.variables[name][:] = [zi][:]
+                                continue
+
+                            x = dst.createVariable(name, variable.datatype, variable.dimensions)
+                            dst.variables[name][:] = src.variables[name][:]
+                
+            else: 
+                # use restart information
+                if os.path.exists('output'): 
+                    old_restart = '' 
+                else:     
+                    old_restart = '' 
+                
+                pass
+        else: 
+            # use restart information
+            pass

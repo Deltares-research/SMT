@@ -6,7 +6,7 @@ import mako
 import os
 import platform
 import sys 
-import netCDF4
+import scipy
 import yaml 
 import shutil
 
@@ -30,10 +30,9 @@ def print_version(ctx, param, value):
     click.echo(f'logging: {logging.__version__}')
     click.echo(f'mako: {mako.__version__}')  
     click.echo(f'netCDF4: {netCDF4.__version__}')  
+    click.echo(f'scipy: {scipy.__version__}')  
     click.echo(f'yaml: {yaml.__version__}')  
     ctx.exit()
-
-
 
 @click.command()
 @click.option('-v', '--version', is_flag=True, callback=print_version,
@@ -65,7 +64,7 @@ def runner(settings, clean, backup):
 
     # get model input 
     for model_settings in model.get_input(smt_settings): 
-        # check if previous output exists 
+        # check if output exists from previous run
         new_output_folder = os.path.join('output', str(model_settings['TStop']))
         if os.path.exists(new_output_folder): 
             logger.info(f'Output folder {new_output_folder} exists, skipping ...')
@@ -84,14 +83,13 @@ def runner(settings, clean, backup):
         app.run('work', smt_settings['model']['input'])
 
         # model.finalize(model_settings, smt_settings)
-        # backup restart file 
+        # backup restart file to local database
         try: 
             restart_file = [rst for rst in glob.glob('work**/**/**_rst.nc', recursive=True)][-1]
         except: 
             logger.error('Check .dia file')
             logger.error('${RstInterval} may not be specified')
             raise IndexError
-        #logger.info(f'Found {restart_file}')
         tools.copy(restart_file, model_settings['RestartFileBackup'])
         # finalize model 
         tools.guaranteedir('output')
