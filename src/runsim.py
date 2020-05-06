@@ -65,7 +65,7 @@ def runner(settings, clean, backup):
     # get model input 
     for model_settings in model.get_input(smt_settings): 
         # check if output exists from previous run
-        new_output_folder = os.path.join('output', str(model_settings['TStop']))
+        new_output_folder = os.path.join('output', str(model_settings['TimeIndex']))
         if os.path.exists(new_output_folder): 
             logger.info(f'Output folder {new_output_folder} exists, skipping ...')
             continue
@@ -77,23 +77,15 @@ def runner(settings, clean, backup):
         model.adapt(model_settings, smt_settings)
         tools.remove(os.path.join('work','**.template'))
    
-        # run model
+        # run model step
         platform_system = platform.system()
         app = Application(run_script=smt_settings['application']['command'][platform_system])
         app.run('work', smt_settings['model']['input'])
 
-        # model.finalize(model_settings, smt_settings)
-        # backup restart file to local database
-        try: 
-            restart_file = [rst for rst in glob.glob('work**/**/**_rst.nc', recursive=True)][-1]
-        except: 
-            logger.error('Check .dia file')
-            logger.error('${RstInterval} may not be specified')
-            raise IndexError
-        tools.copy(restart_file, model_settings['RestartFileBackup'])
-        # finalize model 
+        # finalize model step
         tools.guaranteedir('output')
-        shutil.copytree('work', new_output_folder)
+        shutil.move('work', new_output_folder)
+        model.finalize(model_settings, smt_settings)
 
     if backup: 
         shutil.copytree('local_database', 'central_database')
