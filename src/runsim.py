@@ -10,11 +10,6 @@ import scipy
 import yaml 
 import shutil
 
-# optional, TODO: clean up
-#import collections
-#from collections import OrderedDict
-#from pprint import pprint
-
 #load modules
 import tools
 import model
@@ -30,7 +25,7 @@ def print_version(ctx, param, value):
     click.echo(f'logging: {logging.__version__}')
     click.echo(f'mako: {mako.__version__}')  
     click.echo(f'netCDF4: {netCDF4.__version__}')  
-    click.echo(f'scipy: {scipy.__version__}')  
+    #click.echo(f'scipy: {scipy.__version__}')  
     click.echo(f'yaml: {yaml.__version__}')  
     ctx.exit()
 
