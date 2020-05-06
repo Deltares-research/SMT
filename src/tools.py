@@ -5,6 +5,9 @@ import os
 import logging
 import logging.config
 import glob
+import netCDF4
+from datetime import datetime, timedelta
+import time # for timezone information 
 
 global logger 
 
@@ -60,3 +63,53 @@ def logger_assert(condition, error_message):
         logger.error(error_message)
         raise err
 
+def netcdf_copy(src_netcdf, dst_netcdf, exclude_list): 
+    """ copies src_netcdf to dst_netcdf excluding variables in exclude list """
+
+    logger.info('netCDF copy ' + src_netcdf + ' to ' + dst_netcdf + ' ...')
+    logger.info('excluding variables '+ ' '.join(exclude_list))
+    # open files for reading and writing 
+    with netCDF4.Dataset(src_netcdf, 'r') as src:
+        with netCDF4.Dataset(dst_netcdf, 'w') as dst:
+            
+            # Copy attributes 
+            for attribute in src.ncattrs(): 
+                dst.setncattr(attribute,getattr(src, attribute))
+            
+            # Update attributes with time information 
+            now = datetime.now()
+            dst.setncattr('history', 'Created on '+ now.strftime('%Y-%m-%dT%H:%M:%S') + time.strftime('%z', time.gmtime()) + ', Simulation Management Tool')
+            dst.setncattr('date_created', now.strftime('%Y-%m-%dT%H:%M:%S') + time.strftime('%z', time.gmtime()))
+            dst.setncattr('date_modified', now.strftime('%Y-%m-%dT%H:%M:%S') + time.strftime('%z', time.gmtime()))
+
+            # copy dimensions 
+            for name, dimension in src.dimensions.items():
+                dst.createDimension(name, len(dimension) if not dimension.isunlimited() else None)
+
+            # copy variables
+            for name, variable in src.variables.items():
+                if name in exclude_list: 
+                    continue
+                x = dst.createVariable(name, variable.datatype, variable.dimensions)
+                dst.variables[name][:] = src.variables[name][:]
+
+def netcdf_append(src_netcdf, dst_netcdf, append_list): 
+    """ appends variables in exclude list from src_netcdf to dst_netcdf """
+
+    logger.info('netCDF append ' + src_netcdf + ' to ' + dst_netcdf + ' ...')
+    logger.info('for variables '+ ' '.join(append_list))
+
+    # open files for reading and appending 
+    with netCDF4.Dataset(src_netcdf, 'r') as src:
+        with netCDF4.Dataset(dst_netcdf, 'a') as dst:
+            
+            # Update date_modified attribute
+            now = datetime.now()
+            dst.setncattr('date_modified', now.strftime('%Y-%m-%dT%H:%M:%S') + time.strftime('%z', time.gmtime()))
+
+            # copy variables
+            for name, variable in src.variables.items():
+                if name in append_list: 
+                    x = dst.createVariable(name, variable.datatype, variable.dimensions)
+                    dst.variables[name][:] = src.variables[name][:]                
+                continue

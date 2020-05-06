@@ -8,9 +8,7 @@ import yaml
 import tools
 from datetime import datetime, timedelta
 import pandas as pd 
-from scipy.interpolate import LinearNDInterpolator
 import numpy as np
-import netCDF4
 
 global logger 
 
@@ -122,35 +120,6 @@ def set_input(smt_settings, time_index):
     file_append = '_' + '_'.join(str(k) for k in (filename_settings.values()))
     model_settings['FileAppendix'] = file_append
 
-    if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
-        head, _ = os.path.splitext(smt_settings['model']['input'])
-        restart_file = f'{head}{file_append}_rst.nc'
-        model_settings['RestartFileName'] = restart_file
-        if os.path.exists(os.path.join('local_database',restart_file)):
-            logger.info('Restart file found in local_database')
-            model_settings['RestartFile'] = restart_file
-            model_settings['RestartFileLocation'] = os.path.join('local_database',restart_file)
-            restart_level = 0
-        else: 
-            logger.info('Restart file not found in local_database')
-            if os.path.exists(os.path.join('central_database',restart_file)):
-                logger.info('Restart file found in central_database')
-                model_settings['RestartFile'] = restart_file
-                model_settings['RestartFileLocation'] = os.path.join('central_database',restart_file)
-                restart_level = 1
-            else: 
-                logger.info('Restart file not found in central_database')
-                model_settings['RestartFile'] = ''
-                model_settings['RestartFileLocation'] = '' 
-                logger.info('Cold startup')
-                restart_level = 2
-        model_settings['RestartFileBackup'] = os.path.join('local_database',restart_file)
-        model_settings['SpinupTime'] = model_settings['SpinupTime'][restart_level]
-        model_settings['MorStt'] = model_settings['SpinupTime']
-        #try: 
-        #except: 
-        #    logger.info(f'{key}: not set')
-        #    pass     
     return model_settings
 
 def get_input(smt_settings):
@@ -167,30 +136,61 @@ def get_input(smt_settings):
             for key in model_settings.keys():   
                 logger.debug(f'{key}: {model_settings[key]}')
     
-            model_settings['TStart'] = time_start
-            model_settings['TStop'] = time_start + model_settings['TimeDuration'] + model_settings['SpinupTime'] 
-            if model_settings['TUnit'] == 'S':
-                tunit_in_seconds = 1
-                time_delta_start = timedelta(seconds = time_start)
-            elif model_settings['TUnit'] == 'M':
-                tunit_in_seconds = 60
-                time_delta_start = timedelta(minutes = time_start)
-            elif model_settings['TUnit'] == 'H':
-                tunit_in_seconds = 3600
-                time_delta_start = timedelta(hours = time_start)
-            elif model_settings['TUnit'] == 'D':
-                tunit_in_seconds = 86400
-                time_delta_start = timedelta(days = time_start)
-            refdate = datetime.strptime(model_settings['ReferenceDate'], '%Y%m%d')
-            model_settings['MapInterval'] = (model_settings['TimeDuration'] + model_settings['SpinupTime'])*tunit_in_seconds
-            model_settings['RstInterval'] = (model_settings['TimeDuration'] + model_settings['SpinupTime'])*tunit_in_seconds
+            model_settings['TimeIndex'] = time_index
 
-            model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
-            time_start = model_settings['TStop']
+            if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
+                head, _ = os.path.splitext(smt_settings['model']['input'])
+                file_append = model_settings['FileAppendix']
+                restart_file = f'{head}{file_append}_rst.nc'
+                model_settings['RestartFileBackup'] = os.path.join('local_database',restart_file)                            
+                model_settings['RestartFileName'] = restart_file
+                if os.path.exists(os.path.join('local_database',restart_file)):
+                    logger.info('Restart file found in local_database')
+                    model_settings['RestartFile'] = restart_file
+                    model_settings['RestartFileLocation'] = os.path.join('local_database',restart_file)
+                    restart_level = 0
+                else: 
+                    logger.info('Restart file not found in local_database')
+                    if os.path.exists(os.path.join('central_database',restart_file)):
+                        logger.info('Restart file found in central_database')
+                        model_settings['RestartFile'] = restart_file
+                        model_settings['RestartFileLocation'] = os.path.join('central_database',restart_file)
+                        restart_level = 1
+                    else: 
+                        logger.info('Restart file not found in central_database')
+                        if time_index > 0:
+                            logger.info('Starting from final result of last simulation')
+                            model_settings['RestartFile'] = restart_file
+                            model_settings['RestartFileLocation'] = '' 
+                            restart_level = 2
+                        else:
+                            logger.info('Cold startup')
+                            model_settings['RestartFile'] = ''
+                            model_settings['RestartFileLocation'] = '' 
+                            restart_level = 3
+                model_settings['RestartLevel'] = restart_level        
+                model_settings['SpinupTime'] = model_settings['SpinupTime'][restart_level]
+                model_settings['MorStt'] = model_settings['SpinupTime']
 
-            if time_index > 0: 
-                if 'BedLevelFile' in model_settings.keys():
-                    model_settings['BedLevelFile'] = ''
+                model_settings['TStart'] = time_start
+                model_settings['TStop'] = time_start + model_settings['TimeDuration'] + model_settings['SpinupTime'] 
+                if model_settings['TUnit'] == 'S':
+                    tunit_in_seconds = 1
+                    time_delta_start = timedelta(seconds = time_start)
+                elif model_settings['TUnit'] == 'M':
+                    tunit_in_seconds = 60
+                    time_delta_start = timedelta(minutes = time_start)
+                elif model_settings['TUnit'] == 'H':
+                    tunit_in_seconds = 3600
+                    time_delta_start = timedelta(hours = time_start)
+                elif model_settings['TUnit'] == 'D':
+                    tunit_in_seconds = 86400
+                    time_delta_start = timedelta(days = time_start)
+                refdate = datetime.strptime(model_settings['ReferenceDate'], '%Y%m%d')
+                model_settings['MapInterval'] = (model_settings['TimeDuration'] + model_settings['SpinupTime'])*tunit_in_seconds
+                model_settings['RstInterval'] = (model_settings['TimeDuration'] + model_settings['SpinupTime'])*tunit_in_seconds
+                model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
+                time_start = model_settings['TStop']
 
             yield model_settings
 
@@ -224,45 +224,24 @@ def adapt(model_settings, smt_settings):
                         mytemplate = Template(filename=item, strict_undefined=True)
                         f.write(mytemplate.render(**model_settings).replace('\r',''))
 
-    if model_settings['RestartFileLocation'] != '': 
-        tools.copy(model_settings['RestartFileLocation'],os.path.join('work',model_settings['RestartFile']))
-        if 'BedLevelFile' in model_settings.keys():
-            if model_settings['BedLevelFile'] != '':
-                # read bed level from .xyz/.xyb file 
-                xyz = pd.read_csv(os.path.join('work',model_settings['BedLevelFile']),header=None,sep='\s+', engine='python', names = ['x','y','z'])
-                # make interpolator
-                interpolator = LinearNDInterpolator(xyz[['x','y']].values,xyz['z'].values)
-                
-                # load old restart file in work folder containing correct flow conditions
-                with netCDF4.Dataset(model_settings['RestartFileLocation'], 'r') as src:
-                    with netCDF4.Dataset(os.path.join('work',model_settings['RestartFile']), 'w') as dst:
-                        
-                        #TODO: Attributes
-                        for name, dimension in src.dimensions.items():
-                            dst.createDimension(name, len(dimension) if not dimension.isunlimited() else None)
+    if model_settings['RestartLevel'] < 2: 
+        tools.netcdf_copy(model_settings['RestartFileLocation'], os.path.join('work',model_settings['RestartFile']), smt_settings['model']['exclude_from_database'])
+        if model_settings['TimeIndex'] > 0: 
+            last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
+            tools.netcdf_append(last_output_restart_file, os.path.join('work',model_settings['RestartFile']), smt_settings['model']['exclude_from_database'])
+    elif model_settings['RestartLevel'] == 2: 
+        last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
+        tools.netcdf_copy(last_output_restart_file, os.path.join('work',model_settings['RestartFile']), [])   # copy all data
 
-                        for name, variable in src.variables.items():
-                            if name in ['FlowElem_bl', 'mor_bl']: 
-                                # get interpolation location data
-                                xi=src.variables['FlowElem_xzw'][:].copy()
-                                yi=src.variables['FlowElem_yzw'][:].copy()
-                                xiyi = np.transpose(np.vstack([xi,yi]))
-                                zi = interpolator(xiyi)
-                                x = dst.createVariable(name, variable.datatype, variable.dimensions)
-                                dst.variables[name][:] = [zi][:]
-                                continue
+def finalize(model_settings, smt_settings):
+    """Finalize model output"""
+    
+    # backup restart file to local database
+    try: 
+        restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'])+'/**/**/**_rst.nc', recursive=True)][-1]
+    except: 
+        logger.error('Check .dia file')
+        raise IndexError
+    tools.netcdf_copy(restart_file, model_settings['RestartFileBackup'], smt_settings['model']['exclude_from_database'])
 
-                            x = dst.createVariable(name, variable.datatype, variable.dimensions)
-                            dst.variables[name][:] = src.variables[name][:]
-                
-            else: 
-                # use restart information
-                if os.path.exists('output'): 
-                    old_restart = '' 
-                else:     
-                    old_restart = '' 
-                
-                pass
-        else: 
-            # use restart information
-            pass
+
