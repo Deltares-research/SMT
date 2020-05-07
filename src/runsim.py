@@ -6,7 +6,6 @@ import mako
 import os
 import platform
 import sys 
-import scipy
 import yaml 
 import shutil
 
@@ -25,7 +24,6 @@ def print_version(ctx, param, value):
     click.echo(f'logging: {logging.__version__}')
     click.echo(f'mako: {mako.__version__}')  
     click.echo(f'netCDF4: {netCDF4.__version__}')  
-    #click.echo(f'scipy: {scipy.__version__}')  
     click.echo(f'yaml: {yaml.__version__}')  
     ctx.exit()
 
@@ -74,7 +72,8 @@ def runner(settings, clean, backup):
    
         # run model step
         platform_system = platform.system()
-        app = Application(run_script=smt_settings['application']['command'][platform_system])
+        app = Application(run_script=smt_settings['application']['command'][platform_system],
+                          run_flags=smt_settings['application']['flags'][platform_system])
         app.run('work', smt_settings['model']['input'])
 
         # finalize model step
