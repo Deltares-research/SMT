@@ -37,9 +37,10 @@ def validate(smt_settings):
     logger.info('')
     logger.info('Found the following automatic variables:')
     auto_vars = []
-    for var in smt_settings['variables']['automatic']: 
-        logger.info(var)
-        auto_vars.append(var)
+    if smt_settings['variables']['automatic'] != None:
+        for var in smt_settings['variables']['automatic']: 
+            logger.info(var)
+            auto_vars.append(var)
     user_vars = []
     logger.info('Found the following user defined variables:')
     for var in smt_settings['variables']['user']: 
@@ -56,7 +57,7 @@ def validate(smt_settings):
     # TODO: Assertion checks for cyclic definitions
 
     # Assertion checks for simulation type
-    simulation_types = ['quasi-steady-hydrograph']
+    simulation_types = ['quasi-steady-hydrograph', 'simulation-list']
     tools.logger_assert(smt_settings['model']['simulation_type'] in simulation_types, f'simulation_type should be one of {simulation_types}')
 
 def set_input(smt_settings, time_index):
@@ -100,11 +101,26 @@ def set_input(smt_settings, time_index):
                 model_settings[key] = value
                 dependance_map[key] = ''
             prev_key = key    
+    elif smt_settings['model']['simulation_type'] == 'simulation-list':
+        model_settings = {}
+        dependance_map = {} 
+        if 'fromfile' not in user_vars:
+            logger.critical(f'User variable `fromfile` not found')
+            raise ValueError
+        df = pd.read_csv(smt_user['fromfile'])
+        if time_index in df.index: 
+            for key in df.keys(): 
+                model_settings[key] = df[key][time_index]
+        else: 
+            return None
     else: 
         logger.error('simulation_type not implemented')
         raise NotImplementedError
 
-    reserved_keys = list(smt_settings['variables']['automatic'].keys())
+    if smt_settings['variables']['automatic'] != None: 
+        reserved_keys = list(smt_settings['variables']['automatic'].keys())
+    else: 
+        reserved_keys = []
     
     filename_settings = model_settings.copy()
     for key in reserved_keys: 
@@ -224,24 +240,26 @@ def adapt(model_settings, smt_settings):
                         mytemplate = Template(filename=item, strict_undefined=True)
                         f.write(mytemplate.render(**model_settings).replace('\r',''))
 
-    if model_settings['RestartLevel'] < 2: 
-        tools.netcdf_copy(model_settings['RestartFileLocation'], os.path.join('work',model_settings['RestartFile']), smt_settings['model']['exclude_from_database'])
-        if model_settings['TimeIndex'] > 0: 
+    if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
+        if model_settings['RestartLevel'] < 2: 
+            tools.netcdf_copy(model_settings['RestartFileLocation'], os.path.join('work',model_settings['RestartFile']), smt_settings['model']['exclude_from_database'])
+            if model_settings['TimeIndex'] > 0: 
+                last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
+                tools.netcdf_append(last_output_restart_file, os.path.join('work',model_settings['RestartFile']), smt_settings['model']['exclude_from_database'])
+        elif model_settings['RestartLevel'] == 2: 
             last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
-            tools.netcdf_append(last_output_restart_file, os.path.join('work',model_settings['RestartFile']), smt_settings['model']['exclude_from_database'])
-    elif model_settings['RestartLevel'] == 2: 
-        last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
-        tools.netcdf_copy(last_output_restart_file, os.path.join('work',model_settings['RestartFile']), [])   # copy all data
+            tools.netcdf_copy(last_output_restart_file, os.path.join('work',model_settings['RestartFile']), [])   # copy all data
 
 def finalize(model_settings, smt_settings):
     """Finalize model output"""
     
-    # backup restart file to local database
-    try: 
-        restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'])+'/**/**/**_rst.nc', recursive=True)][-1]
-    except: 
-        logger.error('Check .dia file')
-        raise IndexError
-    tools.netcdf_copy(restart_file, model_settings['RestartFileBackup'], smt_settings['model']['exclude_from_database'])
+    if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
+        # backup restart file to local database
+        try: 
+            restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'])+'/**/**/**_rst.nc', recursive=True)][-1]
+        except: 
+            logger.error('Check .dia file')
+            raise IndexError
+        tools.netcdf_copy(restart_file, model_settings['RestartFileBackup'], smt_settings['model']['exclude_from_database'])
 
 

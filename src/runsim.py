@@ -48,12 +48,14 @@ def runner(settings, clean, backup):
         logger.info(f'Cleaning previous output')
         if os.path.exists('output'):
             shutil.rmtree('output')
-        logger.info(f'Removing local_database')
-        if os.path.exists('local_database'):
-            shutil.rmtree('local_database')
+        if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
+            logger.info(f'Removing local_database')
+            if os.path.exists('local_database'):
+                shutil.rmtree('local_database')
 
-    tools.guaranteedir('central_database')
-    tools.guaranteedir('local_database')
+    if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
+        tools.guaranteedir('central_database')
+        tools.guaranteedir('local_database')
 
     # get model input 
     for model_settings in model.get_input(smt_settings): 

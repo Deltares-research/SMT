@@ -2,7 +2,8 @@
 
 #load libraries
 import os
-from subprocess import run, CompletedProcess, CalledProcessError
+#from subprocess import run, 
+from subprocess import Popen, PIPE, STDOUT, CompletedProcess, CalledProcessError
 
 #load modules
 import tools 
@@ -11,6 +12,11 @@ global logger
 
 # create logger
 logger = tools.init_logger()
+
+def log_subprocess_output(pipe):
+    # function to pass stdout to logger 
+    for line in iter(pipe.readline, b''): # b'\n'-separated lines
+        logger.debug('%s', line.decode().replace('\r\n',''))
 
 class Application():
     """Class for Application"""
@@ -39,11 +45,16 @@ class Application():
         if self.run_flags != None: 
             for flag in self.run_flags: 
                 command.append(flag)
-        command.append(run_entry)
+        if run_entry != None: 
+            command.append(run_entry)
         logger.info('Simulation starting')
         logger.info(' '.join(command))
-        process = run(command, capture_output=True)
-        if process.returncode != 0: 
+        process = Popen(command, stdout=PIPE, stderr=STDOUT)
+        with process.stdout:
+            log_subprocess_output(process.stdout)
+        exitcode = process.wait() # 0 means success
+        #process = run(command, capture_output=True)
+        if exitcode != 0: 
             raise CalledProcessError
         logger.info('Simulation finished')
         os.chdir('..')
