@@ -50,7 +50,7 @@ def remove(pattern):
 
 def guaranteedir(mydir):
     """Make a directory and exit if this is not possible"""
-    if not os.path.exists(mydir):
+    if not os.path.exists(mydir) and mydir != '':
         logger.info('Creating subdirectory ' + mydir + ' ...')
         os.mkdir(mydir)
         if not os.path.isdir(mydir):
@@ -68,6 +68,10 @@ def netcdf_copy(src_netcdf, dst_netcdf, exclude_list):
 
     logger.info('netCDF copy ' + src_netcdf + ' to ' + dst_netcdf + ' ...')
     logger.info('excluding variables '+ ' '.join(exclude_list))
+    
+    # check that directory exists and otherwise make it
+    guaranteedir(os.path.dirname(dst_netcdf))
+
     # open files for reading and writing 
     with netCDF4.Dataset(src_netcdf, 'r') as src:
         with netCDF4.Dataset(dst_netcdf, 'w') as dst:

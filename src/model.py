@@ -65,11 +65,19 @@ def set_input(smt_settings, time_index):
     user_vars = []
     for var in smt_user: 
         user_vars.append(var)
-
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         dependance_map = {} 
         model_settings = {}
         prev_key = ''
+        if 'from_file' in user_vars:
+            df = pd.read_csv(smt_user['from_file'])
+            if time_index in df.index: 
+                for key in df.keys(): 
+                    model_settings[key] = df[key][time_index]
+                    if key == 'TimeDuration': 
+                        dependance_map[key] = ''
+            else: 
+                return None
         for key in user_vars: 
             value = smt_user[key]
             if key in list(model_settings.keys()):
@@ -104,10 +112,10 @@ def set_input(smt_settings, time_index):
     elif smt_settings['model']['simulation_type'] == 'simulation-list':
         model_settings = {}
         dependance_map = {} 
-        if 'fromfile' not in user_vars:
-            logger.critical(f'User variable `fromfile` not found')
+        if 'from_file' not in user_vars:
+            logger.critical(f'User variable `from_file` not found')
             raise ValueError
-        df = pd.read_csv(smt_user['fromfile'])
+        df = pd.read_csv(smt_user['from_file'])
         if time_index in df.index: 
             for key in df.keys(): 
                 model_settings[key] = df[key][time_index]
@@ -158,38 +166,49 @@ def get_input(smt_settings):
                 head, _ = os.path.splitext(smt_settings['model']['input'])
                 file_append = model_settings['FileAppendix']
                 restart_file = f'{head}{file_append}_rst.nc'
-                model_settings['RestartFileBackup'] = os.path.join('local_database',restart_file)                            
-                model_settings['RestartFileName'] = restart_file
+                restart_file_location = restart_file
+                if 'restart_prefix' in smt_settings['model']:
+                    restart_file_location = os.path.join(smt_settings['model']['restart_prefix'],restart_file_location)
+                #model_settings['RestartFileBackup'] = os.path.join('local_database',restart_file)                            
+                #model_settings['RestartFileName'] = restart_file
                 if os.path.exists(os.path.join('local_database',restart_file)):
                     logger.info('Restart file found in local_database')
                     model_settings['RestartFile'] = restart_file
-                    model_settings['RestartFileLocation'] = os.path.join('local_database',restart_file)
+                    model_settings['RestartFileLocation'] = restart_file_location
+                    model_settings['RestartFileFromBackupLocation'] = os.path.join('local_database',restart_file_location)
+                    model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
                     restart_level = 0
                 else: 
                     logger.info('Restart file not found in local_database')
                     if os.path.exists(os.path.join('central_database',restart_file)):
                         logger.info('Restart file found in central_database')
                         model_settings['RestartFile'] = restart_file
-                        model_settings['RestartFileLocation'] = os.path.join('central_database',restart_file)
+                        model_settings['RestartFileLocation'] = restart_file_location
+                        model_settings['RestartFileFromBackupLocation'] = os.path.join('central_database',restart_file)
+                        model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
                         restart_level = 1
                     else: 
                         logger.info('Restart file not found in central_database')
                         if time_index > 0:
                             logger.info('Starting from final result of last simulation')
                             model_settings['RestartFile'] = restart_file
-                            model_settings['RestartFileLocation'] = '' 
+                            model_settings['RestartFileLocation'] = restart_file_location
+                            model_settings['RestartFileFromBackupLocation'] = '' 
+                            model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
                             restart_level = 2
                         else:
                             logger.info('Cold startup')
                             model_settings['RestartFile'] = ''
-                            model_settings['RestartFileLocation'] = '' 
+                            model_settings['RestartFileLocation'] = restart_file_location
+                            model_settings['RestartFileFromBackupLocation'] = '' 
+                            model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
                             restart_level = 3
                 model_settings['RestartLevel'] = restart_level        
                 model_settings['SpinupTime'] = model_settings['SpinupTime'][restart_level]
                 model_settings['MorStt'] = model_settings['SpinupTime']
 
                 model_settings['TStart'] = time_start
-                model_settings['TStop'] = time_start + model_settings['TimeDuration'] + model_settings['SpinupTime'] 
+                model_settings['TStop'] = np.float(time_start + model_settings['TimeDuration'] + model_settings['SpinupTime'])
                 if model_settings['TUnit'] == 'S':
                     tunit_in_seconds = 1
                     time_delta_start = timedelta(seconds = time_start)
@@ -242,13 +261,13 @@ def adapt(model_settings, smt_settings):
 
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         if model_settings['RestartLevel'] < 2: 
-            tools.netcdf_copy(model_settings['RestartFileLocation'], os.path.join('work',model_settings['RestartFile']), smt_settings['model']['exclude_from_database'])
+            tools.netcdf_copy(model_settings['RestartFileFromBackupLocation'], os.path.join('work',model_settings['RestartFileLocation']), smt_settings['model']['exclude_from_database'])
             if model_settings['TimeIndex'] > 0: 
                 last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
-                tools.netcdf_append(last_output_restart_file, os.path.join('work',model_settings['RestartFile']), smt_settings['model']['exclude_from_database'])
+                tools.netcdf_append(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation']), smt_settings['model']['exclude_from_database'])
         elif model_settings['RestartLevel'] == 2: 
             last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
-            tools.netcdf_copy(last_output_restart_file, os.path.join('work',model_settings['RestartFile']), [])   # copy all data
+            tools.netcdf_copy(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation']), [])   # copy all data
 
 def finalize(model_settings, smt_settings):
     """Finalize model output"""
@@ -260,6 +279,6 @@ def finalize(model_settings, smt_settings):
         except: 
             logger.error('Check .dia file')
             raise IndexError
-        tools.netcdf_copy(restart_file, model_settings['RestartFileBackup'], smt_settings['model']['exclude_from_database'])
+        tools.netcdf_copy(restart_file, model_settings['RestartFileToBackupLocation'], smt_settings['model']['exclude_from_database'])
 
 
