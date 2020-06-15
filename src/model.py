@@ -169,14 +169,20 @@ def get_input(smt_settings):
                 restart_file_location = restart_file
                 if 'restart_prefix' in smt_settings['model']:
                     restart_file_location = os.path.join(smt_settings['model']['restart_prefix'],restart_file_location)
-                #model_settings['RestartFileBackup'] = os.path.join('local_database',restart_file)                            
-                #model_settings['RestartFileName'] = restart_file
+                if 'rtc_prefix' in smt_settings['model']:
+                    rtc_file = f'state_import{file_append}.xml'
+                    rtc_file_location = os.path.join(smt_settings['model']['rtc_prefix'],rtc_file)
                 if os.path.exists(os.path.join('local_database',restart_file)):
                     logger.info('Restart file found in local_database')
                     model_settings['RestartFile'] = restart_file
                     model_settings['RestartFileLocation'] = restart_file_location
                     model_settings['RestartFileFromBackupLocation'] = os.path.join('local_database',restart_file_location)
                     model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
+                    if 'rtc_prefix' in smt_settings['model']:
+                        model_settings['RTCFile'] = rtc_file
+                        model_settings['RTCFileLocation'] = rtc_file_location
+                        model_settings['RTCFileFromBackupLocation'] = os.path.join('local_database',rtc_file_location)
+                        model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',rtc_file_location)
                     restart_level = 0
                 else: 
                     logger.info('Restart file not found in local_database')
@@ -186,6 +192,11 @@ def get_input(smt_settings):
                         model_settings['RestartFileLocation'] = restart_file_location
                         model_settings['RestartFileFromBackupLocation'] = os.path.join('central_database',restart_file)
                         model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
+                        if 'rtc_prefix' in smt_settings['model']:
+                            model_settings['RTCFile'] = rtc_file
+                            model_settings['RTCFileLocation'] = rtc_file_location
+                            model_settings['RTCFileFromBackupLocation'] = os.path.join('central_database',rtc_file_location)
+                            model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',rtc_file_location)
                         restart_level = 1
                     else: 
                         logger.info('Restart file not found in central_database')
@@ -195,6 +206,11 @@ def get_input(smt_settings):
                             model_settings['RestartFileLocation'] = restart_file_location
                             model_settings['RestartFileFromBackupLocation'] = '' 
                             model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
+                            if 'rtc_prefix' in smt_settings['model']:
+                                model_settings['RTCFile'] = rtc_file
+                                model_settings['RTCFileLocation'] = rtc_file_location
+                                model_settings['RTCFileFromBackupLocation'] = ''
+                                model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',rtc_file_location)
                             restart_level = 2
                         else:
                             logger.info('Cold startup')
@@ -202,6 +218,11 @@ def get_input(smt_settings):
                             model_settings['RestartFileLocation'] = restart_file_location
                             model_settings['RestartFileFromBackupLocation'] = '' 
                             model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
+                            if 'rtc_prefix' in smt_settings['model']:
+                                model_settings['RTCFile'] = '../../initial/rtc/state_import.xml'
+                                model_settings['RTCFileLocation'] = rtc_file_location
+                                model_settings['RTCFileFromBackupLocation'] = ''
+                                model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',rtc_file_location)
                             restart_level = 3
                 model_settings['RestartLevel'] = restart_level        
                 model_settings['SpinupTime'] = model_settings['SpinupTime'][restart_level]
@@ -251,23 +272,36 @@ def adapt(model_settings, smt_settings):
                 else:
                     filename_new = filename
                 full_filename_new = os.path.join(head,filename_new)
-                if os.path.isfile(full_filename_new): 
-                    logger.debug(f'Skipping {full_filename_new}')
-                else: 
-                    logger.debug(f'Rendering {full_filename_new}')
-                    with open(full_filename_new, 'w') as f:                         
-                        mytemplate = Template(filename=item, strict_undefined=True)
-                        f.write(mytemplate.render(**model_settings).replace('\r',''))
+                # if os.path.isfile(full_filename_new): 
+                #     logger.debug(f'Skipping {full_filename_new}')
+                # else: 
+                logger.debug(f'Rendering {full_filename_new}')
+                with open(full_filename_new, 'w') as f:                         
+                    mytemplate = Template(filename=item, strict_undefined=True)
+                    f.write(mytemplate.render(**model_settings).replace('\r',''))
 
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
+        if 'rtc_prefix' in smt_settings['model']:
+            rtc_new_file = os.path.join('work',smt_settings['model']['rtc_prefix'],'state_import.xml')
         if model_settings['RestartLevel'] < 2: 
             tools.netcdf_copy(model_settings['RestartFileFromBackupLocation'], os.path.join('work',model_settings['RestartFileLocation']), smt_settings['model']['exclude_from_database'])
+            if 'rtc_prefix' in smt_settings['model']:
+                tools.remove(rtc_new_file)
+                tools.copy(model_settings['RTCFileFromBackupLocation'], rtc_new_file)
             if model_settings['TimeIndex'] > 0: 
                 last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
                 tools.netcdf_append(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation']), smt_settings['model']['exclude_from_database'])
+                if 'rtc_prefix' in smt_settings['model']:
+                    last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
+                    tools.remove(rtc_new_file)
+                    tools.copy(last_output_rtc_file, rtc_new_file)                
         elif model_settings['RestartLevel'] == 2: 
             last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
             tools.netcdf_copy(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation']), [])   # copy all data
+            if 'rtc_prefix' in smt_settings['model']:
+                last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
+                tools.remove(rtc_new_file)
+                tools.copy(last_output_rtc_file, rtc_new_file)
 
 def finalize(model_settings, smt_settings):
     """Finalize model output"""
@@ -280,5 +314,8 @@ def finalize(model_settings, smt_settings):
             logger.error('Check .dia file')
             raise IndexError
         tools.netcdf_copy(restart_file, model_settings['RestartFileToBackupLocation'], smt_settings['model']['exclude_from_database'])
+        if 'rtc_prefix' in smt_settings['model']:
+            rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'])+'/**/**/state_export.xml', recursive=True)][-1]
+            tools.copy(rtc_file, model_settings['RTCFileToBackupLocation'])
 
 

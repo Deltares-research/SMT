@@ -8,6 +8,7 @@ import glob
 import netCDF4
 from datetime import datetime, timedelta
 import time # for timezone information 
+import shutil
 
 global logger 
 
@@ -22,14 +23,10 @@ logger = init_logger()
 
 def copy(src, trgt):
     """Recursive copy function from source location to target location"""
+    # check that directory exists and otherwise make it
+    guaranteedir(os.path.dirname(trgt))
     logger.info('Copying ' + src + ' to ' + trgt + ' ...')
-    if os.name == 'nt':
-        os.system('copy /Y ' + src + ' ' + trgt)
-    elif os.name == 'posix':
-        os.system('cp -R ' + src + ' ' + trgt)
-    else:
-        logger.error('Copy statement not implemented for OS "' + os.name + '"')
-        #os._exit(1)
+    shutil.copy(src,trgt)
 
 def move(src, trgt):
     """Recursive move function from source location to target location"""
