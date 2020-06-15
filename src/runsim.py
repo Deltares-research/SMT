@@ -83,8 +83,9 @@ def runner(settings, clean, backup):
         shutil.move('work', new_output_folder)
         model.finalize(model_settings, smt_settings)
 
-    if backup: 
-        shutil.copytree('local_database', 'central_database')
+    if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
+        if backup: 
+            shutil.copytree('local_database', 'central_database')
 
 if __name__ == '__main__':
     runner()
