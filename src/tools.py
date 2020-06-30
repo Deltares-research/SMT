@@ -111,6 +111,13 @@ def netcdf_append(src_netcdf, dst_netcdf, append_list):
             # copy variables
             for name, variable in src.variables.items():
                 if name in append_list: 
+                    dst_dimension_names = [dim[0] for dim in dst.dimensions.items()]
+                    for dim_name in variable.dimensions: 
+                        if dim_name not in dst_dimension_names: 
+                            # copy dimensions 
+                            dimension2 = src.dimensions[dim_name]
+                            dst.createDimension(dim_name, len(dimension2) if not dimension2.isunlimited() else None)
+
                     x = dst.createVariable(name, variable.datatype, variable.dimensions)
                     dst.variables[name][:] = src.variables[name][:]                
                 continue
