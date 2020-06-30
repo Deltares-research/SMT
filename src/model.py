@@ -167,17 +167,20 @@ def get_input(smt_settings):
                 file_append = model_settings['FileAppendix']
                 restart_file = f'{head}{file_append}_rst.nc'
                 restart_file_location = restart_file
+                model_settings['RstIgnoreBl'] = 0
                 if 'restart_prefix' in smt_settings['model']:
                     restart_file_location = os.path.join(smt_settings['model']['restart_prefix'],restart_file_location)
                 if 'rtc_prefix' in smt_settings['model']:
                     rtc_file = f'state_import{file_append}.xml'
                     rtc_file_location = os.path.join(smt_settings['model']['rtc_prefix'],rtc_file)
-                if os.path.exists(os.path.join('local_database',restart_file)):
+                if os.path.exists(os.path.join('local_database',restart_file_location)):
                     logger.info('Restart file found in local_database')
                     model_settings['RestartFile'] = restart_file
                     model_settings['RestartFileLocation'] = restart_file_location
                     model_settings['RestartFileFromBackupLocation'] = os.path.join('local_database',restart_file_location)
                     model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
+                    if time_index == 0: 
+                        model_settings['RstIgnoreBl'] = 1
                     if 'rtc_prefix' in smt_settings['model']:
                         model_settings['RTCFile'] = rtc_file
                         model_settings['RTCFileLocation'] = rtc_file_location
@@ -186,12 +189,14 @@ def get_input(smt_settings):
                     restart_level = 0
                 else: 
                     logger.info('Restart file not found in local_database')
-                    if os.path.exists(os.path.join('central_database',restart_file)):
+                    if os.path.exists(os.path.join('central_database',restart_file_location)):
                         logger.info('Restart file found in central_database')
                         model_settings['RestartFile'] = restart_file
                         model_settings['RestartFileLocation'] = restart_file_location
-                        model_settings['RestartFileFromBackupLocation'] = os.path.join('central_database',restart_file)
+                        model_settings['RestartFileFromBackupLocation'] = os.path.join('central_database',restart_file_location)
                         model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
+                        if time_index == 0: 
+                            model_settings['RstIgnoreBl'] = 1
                         if 'rtc_prefix' in smt_settings['model']:
                             model_settings['RTCFile'] = rtc_file
                             model_settings['RTCFileLocation'] = rtc_file_location
@@ -243,8 +248,9 @@ def get_input(smt_settings):
                     tunit_in_seconds = 86400
                     time_delta_start = timedelta(days = time_start)
                 refdate = datetime.strptime(model_settings['ReferenceDate'], '%Y%m%d')
-                model_settings['MapInterval'] = (model_settings['TimeDuration'] + model_settings['SpinupTime'])*tunit_in_seconds
-                model_settings['RstInterval'] = (model_settings['TimeDuration'] + model_settings['SpinupTime'])*tunit_in_seconds
+                time_stop_seconds = (model_settings['TimeDuration'] + model_settings['SpinupTime'])*tunit_in_seconds
+                model_settings['MapInterval'] = time_stop_seconds
+                model_settings['RstInterval'] = time_stop_seconds
                 model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
                 time_start = model_settings['TStop']
 
@@ -291,10 +297,10 @@ def adapt(model_settings, smt_settings):
             if model_settings['TimeIndex'] > 0: 
                 last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
                 tools.netcdf_append(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation']), smt_settings['model']['exclude_from_database'])
-                if 'rtc_prefix' in smt_settings['model']:
-                    last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
-                    tools.remove(rtc_new_file)
-                    tools.copy(last_output_rtc_file, rtc_new_file)                
+                # if 'rtc_prefix' in smt_settings['model']:
+                #     last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
+                #     tools.remove(rtc_new_file)
+                #     tools.copy(last_output_rtc_file, rtc_new_file)                
         elif model_settings['RestartLevel'] == 2: 
             last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
             tools.netcdf_copy(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation']), [])   # copy all data
