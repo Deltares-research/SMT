@@ -143,7 +143,8 @@ def set_input(smt_settings, time_index):
             
     file_append = '_' + '_'.join(str(k) for k in (filename_settings.values()))
     model_settings['FileAppendix'] = file_append
-
+    model_settings['TimeIndex'] = time_index
+    
     return model_settings
 
 def get_input(smt_settings):
@@ -155,16 +156,17 @@ def get_input(smt_settings):
     while True and model_settings != None: 
         model_settings = set_input(smt_settings, time_index)
 
+
         if model_settings != None: 
             logger.debug('Variables updated ...')
             for key in model_settings.keys():   
                 logger.debug(f'{key}: {model_settings[key]}')
-    
-            model_settings['TimeIndex'] = time_index
 
             if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
                 head, _ = os.path.splitext(smt_settings['model']['input'])
+                partition_total = get_partition_total(smt_settings)
                 file_append = model_settings['FileAppendix']
+
                 restart_file = f'{head}{file_append}_rst.nc'
                 restart_file_location = restart_file
                 model_settings['RstIgnoreBl'] = 0
@@ -173,7 +175,7 @@ def get_input(smt_settings):
                 if 'rtc_prefix' in smt_settings['model']:
                     rtc_file = f'state_import{file_append}.xml'
                     rtc_file_location = os.path.join(smt_settings['model']['rtc_prefix'],rtc_file)
-                if os.path.exists(os.path.join('local_database',restart_file_location)):
+                if partition_path_exists(os.path.join('local_database',restart_file_location), head, partition_total):
                     logger.info('Restart file found in local_database')
                     model_settings['RestartFile'] = restart_file
                     model_settings['RestartFileLocation'] = restart_file_location
@@ -189,7 +191,7 @@ def get_input(smt_settings):
                     restart_level = 0
                 else: 
                     logger.info('Restart file not found in local_database')
-                    if os.path.exists(os.path.join('central_database',restart_file_location)):
+                    if partition_path_exists(os.path.join('central_database',restart_file_location), head, partition_total):
                         logger.info('Restart file found in central_database')
                         model_settings['RestartFile'] = restart_file
                         model_settings['RestartFileLocation'] = restart_file_location
@@ -289,39 +291,81 @@ def adapt(model_settings, smt_settings):
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         if 'rtc_prefix' in smt_settings['model']:
             rtc_new_file = os.path.join('work',smt_settings['model']['rtc_prefix'],'state_import.xml')
-        if model_settings['RestartLevel'] < 2: 
-            tools.netcdf_copy(model_settings['RestartFileFromBackupLocation'], os.path.join('work',model_settings['RestartFileLocation']), smt_settings['model']['exclude_from_database'])
-            if 'rtc_prefix' in smt_settings['model']:
-                tools.remove(rtc_new_file)
-                tools.copy(model_settings['RTCFileFromBackupLocation'], rtc_new_file)
-            if model_settings['TimeIndex'] > 0: 
-                last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
-                tools.netcdf_append(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation']), smt_settings['model']['exclude_from_database'])
-                # if 'rtc_prefix' in smt_settings['model']:
-                #     last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
-                #     tools.remove(rtc_new_file)
-                #     tools.copy(last_output_rtc_file, rtc_new_file)                
-        elif model_settings['RestartLevel'] == 2: 
-            last_output_restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/**_rst.nc', recursive=True)][-1]
-            tools.netcdf_copy(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation']), [])   # copy all data
-            if 'rtc_prefix' in smt_settings['model']:
-                last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
-                tools.remove(rtc_new_file)
-                tools.copy(last_output_rtc_file, rtc_new_file)
+
+        head, _ = os.path.splitext(smt_settings['model']['input'])
+        partition_total = get_partition_total(smt_settings)
+
+        for partition_number in range(partition_total): 
+            if partition_total == 1: 
+                partition_string = '' 
+            else: 
+                partition_string = f'_{partition_number:04}'
+                            
+            if model_settings['RestartLevel'] < 2: 
+                tools.netcdf_copy(model_settings['RestartFileFromBackupLocation'].replace(head, f'{head}{partition_string}'), 
+                                  os.path.join('work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), 
+                                  smt_settings['model']['exclude_from_database'])
+                if 'rtc_prefix' in smt_settings['model']:
+                    tools.remove(rtc_new_file)
+                    tools.copy(model_settings['RTCFileFromBackupLocation'], rtc_new_file)
+                if model_settings['TimeIndex'] > 0: 
+                    last_output_restart_file = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"] - 1}/**/**/{head}{partition_string}**_rst.nc', recursive=True)][-1]
+                    tools.netcdf_append(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), 
+                                        smt_settings['model']['exclude_from_database'])
+                    # if 'rtc_prefix' in smt_settings['model']:
+                    #     last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
+                    #     tools.remove(rtc_new_file)
+                    #     tools.copy(last_output_rtc_file, rtc_new_file)                
+            elif model_settings['RestartLevel'] == 2: 
+                last_output_restart_file = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"] - 1}/**/**/{head}{partition_string}**_rst.nc', recursive=True)][-1]
+                tools.netcdf_copy(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), [])   # copy all data
+                if 'rtc_prefix' in smt_settings['model']:
+                    last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
+                    tools.remove(rtc_new_file)
+                    tools.copy(last_output_rtc_file, rtc_new_file)
 
 def finalize(model_settings, smt_settings):
     """Finalize model output"""
     
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
-        # backup restart file to local database
-        try: 
-            restart_file = [rst for rst in glob.glob('output/'+str(model_settings['TimeIndex'])+'/**/**/**_rst.nc', recursive=True)][-1]
-        except: 
-            logger.error('Check .dia file')
-            raise IndexError
-        tools.netcdf_copy(restart_file, model_settings['RestartFileToBackupLocation'], smt_settings['model']['exclude_from_database'])
-        if 'rtc_prefix' in smt_settings['model']:
-            rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'])+'/**/**/state_export.xml', recursive=True)][-1]
-            tools.copy(rtc_file, model_settings['RTCFileToBackupLocation'])
+        head, _ = os.path.splitext(smt_settings['model']['input'])
+        partition_total = get_partition_total(smt_settings)
+        
+        for partition_number in range(partition_total): 
+            if partition_total == 1: 
+                partition_string = '' 
+            else: 
+                partition_string = f'_{partition_number:04}'
+
+            # backup restart file to local database
+            try: 
+                restart_file = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"]}/**/**/{head}{partition_string}**_rst.nc', recursive=True)][-1]
+            except: 
+                logger.error('Check .dia file')
+                raise IndexError
+            tools.netcdf_copy(restart_file, model_settings['RestartFileToBackupLocation'].replace(head, f'{head}{partition_string}'),  
+                smt_settings['model']['exclude_from_database'])
+            if 'rtc_prefix' in smt_settings['model']:
+                rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'])+'/**/**/state_export.xml', recursive=True)][-1]
+                tools.copy(rtc_file, model_settings['RTCFileToBackupLocation'])
+
+def get_partition_total(smt_settings): 
+    # get total number of partitions
+    if 'partitions' in smt_settings['model'].keys(): 
+        partition_total = smt_settings['model']['partitions']
+    else: 
+        partition_total = 1
+    return partition_total
 
 
+def partition_path_exists(restartfile, head, partition_total): 
+    path_exists_list = []
+    for partition_number in range(partition_total): 
+        if partition_total == 1: 
+            partition_string = '' 
+        else: 
+            partition_string = f'_{partition_number:04}'
+        if not os.path.exists(restartfile.replace(head, f'{head}{partition_string}')): 
+            return False
+    return True
+        
