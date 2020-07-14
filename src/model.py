@@ -285,7 +285,7 @@ def adapt(model_settings, smt_settings):
                 # else: 
                 logger.debug(f'Rendering {full_filename_new}')
                 with open(full_filename_new, 'w') as f:                         
-                    mytemplate = Template(filename=item, strict_undefined=True)
+                    mytemplate = Template(filename=item, strict_undefined=True, input_encoding='utf-8')
                     f.write(mytemplate.render(**model_settings).replace('\r',''))
 
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
