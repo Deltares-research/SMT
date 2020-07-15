@@ -290,7 +290,8 @@ def adapt(model_settings, smt_settings):
                 with open(full_filename_new, 'w') as f:                         
                     mytemplate = Template(filename=item, strict_undefined=True, input_encoding='utf-8')
                     f.write(mytemplate.render(**model_settings).replace('\r',''))
-
+                if file_ext == '.sh': 
+                    os.chmod(full_filename_new, 0o0777)
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         if 'rtc_prefix' in smt_settings['model']:
             rtc_new_file = os.path.join('work',smt_settings['model']['rtc_prefix'],'state_import.xml')
