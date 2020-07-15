@@ -144,7 +144,10 @@ def set_input(smt_settings, time_index):
     file_append = '_' + '_'.join(str(k) for k in (filename_settings.values()))
     model_settings['FileAppendix'] = file_append
     model_settings['TimeIndex'] = time_index
-    
+
+    partition_total, processes_string = get_partition_total(smt_settings)
+    model_settings['ProcessesString'] = processes_string
+
     return model_settings
 
 def get_input(smt_settings):
@@ -156,6 +159,7 @@ def get_input(smt_settings):
     while True and model_settings != None: 
         model_settings = set_input(smt_settings, time_index)
 
+        partition_total, _ = get_partition_total(smt_settings)
 
         if model_settings != None: 
             logger.debug('Variables updated ...')
@@ -164,7 +168,6 @@ def get_input(smt_settings):
 
             if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
                 head, _ = os.path.splitext(smt_settings['model']['input'])
-                partition_total = get_partition_total(smt_settings)
                 file_append = model_settings['FileAppendix']
 
                 restart_file = f'{head}{file_append}_rst.nc'
@@ -293,7 +296,7 @@ def adapt(model_settings, smt_settings):
             rtc_new_file = os.path.join('work',smt_settings['model']['rtc_prefix'],'state_import.xml')
 
         head, _ = os.path.splitext(smt_settings['model']['input'])
-        partition_total = get_partition_total(smt_settings)
+        partition_total, _ = get_partition_total(smt_settings)
 
         for partition_number in range(partition_total): 
             if partition_total == 1: 
@@ -329,7 +332,7 @@ def finalize(model_settings, smt_settings):
     
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         head, _ = os.path.splitext(smt_settings['model']['input'])
-        partition_total = get_partition_total(smt_settings)
+        partition_total, _ = get_partition_total(smt_settings)
         
         for partition_number in range(partition_total): 
             if partition_total == 1: 
@@ -351,11 +354,15 @@ def finalize(model_settings, smt_settings):
 
 def get_partition_total(smt_settings): 
     # get total number of partitions
-    if 'partitions' in smt_settings['model'].keys(): 
-        partition_total = smt_settings['model']['partitions']
+    if 'nNodes' in smt_settings['variables']['user'].keys(): 
+        if 'nProc' in smt_settings['variables']['user'].keys(): 
+            partition_total = smt_settings['variables']['user']['nNodes']*smt_settings['variables']['user']['nProc']
+            processes_string = ' '.join([str(j) for j in range(partition_total)])
     else: 
         partition_total = 1
-    return partition_total
+        processes_string = '0'
+    return partition_total, processes_string
+
 
 
 def partition_path_exists(restartfile, head, partition_total): 
