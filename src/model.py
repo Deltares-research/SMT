@@ -170,20 +170,17 @@ def get_input(smt_settings):
                 head, _ = os.path.splitext(smt_settings['model']['input'])
                 file_append = model_settings['FileAppendix']
 
-                restart_file = f'{head}{file_append}_rst.nc'
-                restart_file_location = restart_file
+                restart_file_database = f'{head}{file_append}_rst.nc'
                 model_settings['RstIgnoreBl'] = 0
                 if 'restart_prefix' in smt_settings['model']:
-                    restart_file_location = os.path.join(smt_settings['model']['restart_prefix'],restart_file_location)
+                    restart_file_database = os.path.join(smt_settings['model']['restart_prefix'],restart_file_database)
                 if 'rtc_prefix' in smt_settings['model']:
                     rtc_file = f'state_import{file_append}.xml'
                     rtc_file_location = os.path.join(smt_settings['model']['rtc_prefix'],rtc_file)
-                if partition_path_exists(os.path.join('local_database',restart_file_location), head, partition_total):
+                if partition_path_exists(os.path.join('local_database',restart_file_database), head, partition_total):
                     logger.info('Restart file found in local_database')
-                    model_settings['RestartFile'] = restart_file
-                    model_settings['RestartFileLocation'] = restart_file_location
-                    model_settings['RestartFileFromBackupLocation'] = os.path.join('local_database',restart_file_location)
-                    model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
+                    model_settings['RestartFileFromBackupLocation'] = os.path.join('local_database',restart_file_database)
+                    model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_database)
                     if time_index == 0: 
                         model_settings['RstIgnoreBl'] = 1
                     if 'rtc_prefix' in smt_settings['model']:
@@ -194,12 +191,10 @@ def get_input(smt_settings):
                     restart_level = 0
                 else: 
                     logger.info('Restart file not found in local_database')
-                    if partition_path_exists(os.path.join('central_database',restart_file_location), head, partition_total):
+                    if partition_path_exists(os.path.join('central_database',restart_file_database), head, partition_total):
                         logger.info('Restart file found in central_database')
-                        model_settings['RestartFile'] = restart_file
-                        model_settings['RestartFileLocation'] = restart_file_location
-                        model_settings['RestartFileFromBackupLocation'] = os.path.join('central_database',restart_file_location)
-                        model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
+                        model_settings['RestartFileFromBackupLocation'] = os.path.join('central_database',restart_file_database)
+                        model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_database)
                         if time_index == 0: 
                             model_settings['RstIgnoreBl'] = 1
                         if 'rtc_prefix' in smt_settings['model']:
@@ -212,10 +207,8 @@ def get_input(smt_settings):
                         logger.info('Restart file not found in central_database')
                         if time_index > 0:
                             logger.info('Starting from final result of last simulation')
-                            model_settings['RestartFile'] = restart_file
-                            model_settings['RestartFileLocation'] = restart_file_location
                             model_settings['RestartFileFromBackupLocation'] = '' 
-                            model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
+                            model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_database)
                             if 'rtc_prefix' in smt_settings['model']:
                                 model_settings['RTCFile'] = rtc_file
                                 model_settings['RTCFileLocation'] = rtc_file_location
@@ -224,10 +217,8 @@ def get_input(smt_settings):
                             restart_level = 2
                         else:
                             logger.info('Cold startup')
-                            model_settings['RestartFile'] = ''
-                            model_settings['RestartFileLocation'] = restart_file_location
                             model_settings['RestartFileFromBackupLocation'] = '' 
-                            model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_location)
+                            model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_database)
                             if 'rtc_prefix' in smt_settings['model']:
                                 model_settings['RTCFile'] = '../../initial/rtc/state_import.xml'
                                 model_settings['RTCFileLocation'] = rtc_file_location
@@ -259,6 +250,15 @@ def get_input(smt_settings):
                 model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
                 time_start = model_settings['TStop']
 
+                model_settings['RestartFile'] = ''
+                model_settings['RestartFileLocation'] = '' # restart_file_database
+                if restart_level < 3: 
+                    restart_file_date_time_string = datetime.strftime(refdate + time_delta_start, '%Y%m%d_%H%M%S')
+                    model_settings['RestartFile'] = f'{head}_{restart_file_date_time_string}_rst.nc'
+                    if 'restart_prefix' in smt_settings['model']:
+                        model_settings['RestartFileLocation'] = os.path.join(smt_settings['model']['restart_prefix'],model_settings['RestartFile'])  
+                    else:                   
+                        model_settings['RestartFileLocation'] = model_settings['RestartFile']
             yield model_settings
 
         # increase counter 
@@ -283,9 +283,6 @@ def adapt(model_settings, smt_settings):
                 else:
                     filename_new = filename
                 full_filename_new = os.path.join(head,filename_new)
-                # if os.path.isfile(full_filename_new): 
-                #     logger.debug(f'Skipping {full_filename_new}')
-                # else: 
                 logger.debug(f'Rendering {full_filename_new}')
                 with open(full_filename_new, 'w') as f:                         
                     mytemplate = Template(filename=item, strict_undefined=True, input_encoding='utf-8')
@@ -343,11 +340,11 @@ def finalize(model_settings, smt_settings):
 
             # backup restart file to local database
             try: 
-                restart_file = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"]}/**/**/{head}{partition_string}**_rst.nc', recursive=True)][-1]
+                restart_file_database = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"]}/**/**/{head}{partition_string}**_rst.nc', recursive=True)][-1]
             except: 
                 logger.error('Check .dia file')
                 raise IndexError
-            tools.netcdf_copy(restart_file, model_settings['RestartFileToBackupLocation'].replace(head, f'{head}{partition_string}'),  
+            tools.netcdf_copy(restart_file_database, model_settings['RestartFileToBackupLocation'].replace(head, f'{head}{partition_string}'),  
                 smt_settings['model']['exclude_from_database'])
             if 'rtc_prefix' in smt_settings['model']:
                 rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'])+'/**/**/state_export.xml', recursive=True)][-1]
