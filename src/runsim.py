@@ -70,7 +70,7 @@ def runner(settings, clean, backup):
             shutil.rmtree('work')
         shutil.copytree('source','work')
         model.adapt(model_settings, smt_settings)
-        tools.remove(os.path.join('work','**.template'))
+        tools.remove(os.path.join('work','**','**.template'))
    
         # run model step
         platform_system = platform.system()
