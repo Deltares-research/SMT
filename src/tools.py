@@ -91,8 +91,12 @@ def netcdf_copy(src_netcdf, dst_netcdf, exclude_list):
             for name, variable in src.variables.items():
                 if name in exclude_list: 
                     continue
-                x = dst.createVariable(name, variable.datatype, variable.dimensions)
+                _ = dst.createVariable(name, variable.datatype, variable.dimensions)
                 dst.variables[name][:] = src.variables[name][:]
+                # copy variable attributes all at once via dictionary
+                #for attrname in variable.ncattrs():
+                #    logger.info("{} -- {}".format(attrname, getattr(variable, attrname)))
+                dst.variables[name].setncatts(src.variables[name].__dict__)
 
 def netcdf_append(src_netcdf, dst_netcdf, append_list): 
     """ appends variables in exclude list from src_netcdf to dst_netcdf """
@@ -118,6 +122,10 @@ def netcdf_append(src_netcdf, dst_netcdf, append_list):
                             dimension2 = src.dimensions[dim_name]
                             dst.createDimension(dim_name, len(dimension2) if not dimension2.isunlimited() else None)
 
-                    x = dst.createVariable(name, variable.datatype, variable.dimensions)
+                    _ = dst.createVariable(name, variable.datatype, variable.dimensions)
                     dst.variables[name][:] = src.variables[name][:]                
+                    # copy variable attributes all at once via dictionary
+                    #for attrname in variable.ncattrs():
+                    #    logger.info("{} -- {}".format(attrname, getattr(variable, attrname)))
+                    dst.variables[name].setncatts(src.variables[name].__dict__)
                 continue

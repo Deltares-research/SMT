@@ -340,7 +340,9 @@ def finalize(model_settings, smt_settings):
 
             # backup restart file to local database
             try: 
-                restart_file_database = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"]}/**/**/{head}{partition_string}**_rst.nc', recursive=True)][-1]
+                files = glob.glob(f'output/{model_settings["TimeIndex"]}/**/**/{head}{partition_string}**_rst.nc', recursive=True)
+                files.sort(key=os.path.getmtime)
+                restart_file_database = files[-1]  # get last restart time
             except: 
                 logger.error('Check .dia file')
                 raise IndexError
