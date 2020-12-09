@@ -54,8 +54,8 @@ class Application():
             log_subprocess_output(process.stdout)
         exitcode = process.wait() # 0 means success
         #process = run(command, capture_output=True)
-        if exitcode != 0: 
-            raise CalledProcessError
+        #if exitcode != 0: 
+        #    raise CalledProcessError
         logger.info('Simulation finished')
         os.chdir('..')
 
