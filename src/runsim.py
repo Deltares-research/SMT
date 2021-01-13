@@ -16,6 +16,7 @@ from application import Application
 
 # TODO: print module version info
 def print_version(ctx, param, value):
+    import netCDF4
     if not value or ctx.resilient_parsing:
         return
     click.echo('SMT version 2.0.$Rev$')  #TODO set version number
@@ -52,6 +53,13 @@ def runner(settings, clean, backup):
             logger.info(f'Removing local_database')
             if os.path.exists('local_database'):
                 shutil.rmtree('local_database')
+        logger.info(f'Finished cleaning previous output')
+        exit()
+
+    if backup: 
+        if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
+            shutil.copytree('local_database', 'central_database')
+        exit()
 
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         tools.guaranteedir('central_database')
@@ -83,9 +91,6 @@ def runner(settings, clean, backup):
         shutil.move('work', new_output_folder)
         model.finalize(model_settings, smt_settings)
 
-    if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
-        if backup: 
-            shutil.copytree('local_database', 'central_database')
 
 if __name__ == '__main__':
     runner()
