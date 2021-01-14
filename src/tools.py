@@ -92,11 +92,13 @@ def netcdf_copy(src_netcdf, dst_netcdf, exclude_list):
                 if name in exclude_list: 
                     continue
                 _ = dst.createVariable(name, variable.datatype, variable.dimensions)
-                dst.variables[name][:] = src.variables[name][:]
                 # copy variable attributes all at once via dictionary
                 #for attrname in variable.ncattrs():
                 #    logger.info("{} -- {}".format(attrname, getattr(variable, attrname)))
+                #print(src.variables[name].__dict__)
                 dst.variables[name].setncatts(src.variables[name].__dict__)
+                # copy data for variable
+                dst.variables[name][:] = src.variables[name][:]
 
 def netcdf_append(src_netcdf, dst_netcdf, append_list): 
     """ appends variables in exclude list from src_netcdf to dst_netcdf """
