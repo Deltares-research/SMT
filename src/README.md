@@ -27,7 +27,7 @@ To run the SMT, first activate the `smt` environment
 
 
 Then simply call runsim.py with a dedicated .yml file from the folder where the .yml lives
- `../../src/runsim.py` 
+ `python src/runsim.py` 
 
 ```
 Usage: runsim.py [OPTIONS]
@@ -91,7 +91,7 @@ In the examples folder you may find the following examples
 
 ## Known Issues --->
 Unfortunately, sometimes some known issues may appear: 
-- Delft3D-FM sometimes does not close of the process properly, locking the work folder for instance. To work around this, it may be necessary to restart you console window.
+- Delft3D-FM sometimes does not close off the process properly, locking the work folder for instance. To work around this, it may be necessary to restart your console window.
 
 
 ## Licence
