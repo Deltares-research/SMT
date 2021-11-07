@@ -64,13 +64,14 @@ def set_input(smt_settings, time_index):
     smt_user = smt_settings['variables']['user']
     user_vars = []
     for var in smt_user: 
-        user_vars.append(var)
+        user_vars.append(var.strip())
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         dependance_map = {} 
         model_settings = {}
         prev_key = ''
         if 'from_file' in user_vars:
             df = pd.read_csv(smt_user['from_file'])
+            df.rename(columns = dict(zip(df.keys(),list(s.strip() for s  in df.keys()))), inplace=True)
             if time_index in df.index: 
                 for key in df.keys(): 
                     model_settings[key] = df[key][time_index]
@@ -116,6 +117,7 @@ def set_input(smt_settings, time_index):
             logger.critical(f'User variable `from_file` not found')
             raise ValueError
         df = pd.read_csv(smt_user['from_file'])
+        df.rename(columns = dict(zip(df.keys(),list(s.strip() for s  in df.keys()))), inplace=True)
         if time_index in df.index: 
             for key in df.keys(): 
                 model_settings[key] = df[key][time_index]
