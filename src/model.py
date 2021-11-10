@@ -156,7 +156,7 @@ def get_input(smt_settings):
     """Generator for model input"""
 
     time_index = 0
-    time_start = 0
+    time_start = 0.
     model_settings = []
     while True and model_settings != None: 
         model_settings = set_input(smt_settings, time_index)
@@ -232,7 +232,8 @@ def get_input(smt_settings):
                 model_settings['MorStt'] = model_settings['SpinupTime']
 
                 model_settings['TStart'] = time_start
-                model_settings['TStop'] = np.float(time_start + model_settings['TimeDuration'] + model_settings['SpinupTime'])
+                time_stop = time_start + model_settings['TimeDuration'] + model_settings['SpinupTime']
+                model_settings['TStop'] = time_stop
                 if model_settings['TUnit'] == 'S':
                     tunit_in_seconds = 1
                     time_delta_start = timedelta(seconds = time_start)
@@ -246,9 +247,12 @@ def get_input(smt_settings):
                     tunit_in_seconds = 86400
                     time_delta_start = timedelta(days = time_start)
                 refdate = datetime.strptime(model_settings['ReferenceDate'], '%Y%m%d')
-                time_stop_seconds = (model_settings['TimeDuration'] + model_settings['SpinupTime'])*tunit_in_seconds
-                model_settings['MapInterval'] = time_stop_seconds
-                model_settings['RstInterval'] = time_stop_seconds
+                time_start_seconds = time_start*tunit_in_seconds
+                time_start_post_spinup_seconds = (time_start+model_settings['SpinupTime'])*tunit_in_seconds
+                time_stop_seconds = time_stop*tunit_in_seconds
+                time_duration_post_spinup_seconds = np.float(model_settings['TimeDuration'])*tunit_in_seconds
+                model_settings['MapInterval'] = f"{time_duration_post_spinup_seconds} {time_start_post_spinup_seconds} {time_stop_seconds}"
+                model_settings['RstInterval'] = f"{time_duration_post_spinup_seconds} {time_start_post_spinup_seconds} {time_stop_seconds}"
                 model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
                 time_start = model_settings['TStop']
 
