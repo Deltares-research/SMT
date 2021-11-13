@@ -14,12 +14,11 @@ import tools
 import model
 from application import Application
 
-# TODO: print module version info
 def print_version(ctx, param, value):
     import netCDF4
     if not value or ctx.resilient_parsing:
         return
-    click.echo('SMT version 2.0.$Revision$')  #TODO set version number
+    click.echo('SMT version 2.0.' + '$Revision$'.split(' ')[1])
     click.echo('--dependencies---')
     click.echo(f'click : {click.__version__}')
     click.echo(f'logging: {logging.__version__}')
