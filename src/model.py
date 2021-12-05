@@ -316,7 +316,9 @@ def adapt(model_settings, smt_settings):
                     tools.remove(rtc_new_file)
                     tools.copy(model_settings['RTCFileFromBackupLocation'], rtc_new_file)
                 if model_settings['TimeIndex'] > 0: 
-                    last_output_restart_file = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"] - 1}/**/**/{head}{partition_string}**_rst.nc', recursive=True)][-1]
+                    files = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"] - 1}/**/**/{head}{partition_string}**_rst.nc', recursive=True)]
+                    files.sort(key=os.path.getmtime)  
+                    last_output_restart_file = files[-1]
                     tools.netcdf_append(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), 
                                         smt_settings['model']['exclude_from_database'])
                     # if 'rtc_prefix' in smt_settings['model']:
