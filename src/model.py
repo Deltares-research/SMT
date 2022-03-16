@@ -219,7 +219,7 @@ def get_input(smt_settings):
                             restart_level = 2
                         else:
                             logger.info('Cold startup')
-                            model_settings['RestartFileFromBackupLocation'] = '' 
+                            model_settings['RestartFileFromBackupLocation'] = '' # None ?
                             model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_database)
                             if 'rtc_prefix' in smt_settings['model']:
                                 model_settings['RTCFile'] = '../../initial/rtc/state_import.xml'
@@ -254,6 +254,7 @@ def get_input(smt_settings):
                 model_settings['MapInterval'] = f"{time_duration_post_spinup_seconds} {time_start_post_spinup_seconds} {time_stop_seconds}"
                 model_settings['RstInterval'] = f"{time_duration_post_spinup_seconds} {time_start_post_spinup_seconds} {time_stop_seconds}"
                 model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
+                model_settings['RestartDateTimeStop'] = datetime.strftime(refdate + timedelta(seconds = time_stop_seconds), '%Y%m%d_%H%M%S')
                 time_start = model_settings['TStop']
 
                 model_settings['RestartFile'] = ''
@@ -348,9 +349,9 @@ def finalize(model_settings, smt_settings):
 
             # backup restart file to local database
             try: 
-                files = glob.glob(f'output/{model_settings["TimeIndex"]}/**/**/{head}{partition_string}**_rst.nc', recursive=True)
-                files.sort(key=os.path.getmtime)
-                restart_file_database = files[-1]  # get last restart time
+                files = glob.glob(f'output/{model_settings["TimeIndex"]}/{model_settings["OutputDir"]}/{head}{partition_string}_{model_settings["RestartDateTimeStop"]}_rst.nc', recursive=True)
+                #files.sort(key=os.path.getmtime)
+                restart_file_database = files[0]  # get last restart time
             except: 
                 logger.error('Check .dia file')
                 raise IndexError
