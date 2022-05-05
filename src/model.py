@@ -150,6 +150,10 @@ def set_input(smt_settings, time_index):
     partition_total, processes_string = get_partition_total(smt_settings)
     model_settings['ProcessesString'] = processes_string
 
+    for key in model_settings.keys(): 
+        if type(model_settings[key])==str: 
+            model_settings[key]=model_settings[key].replace(r'${FileAppendix}', model_settings['FileAppendix'])  
+
     return model_settings
 
 def get_input(smt_settings):
@@ -217,6 +221,9 @@ def get_input(smt_settings):
                                 model_settings['RTCFileFromBackupLocation'] = ''
                                 model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',rtc_file_location)
                             restart_level = 2
+                            # All Initial field information follows from previous restart, so do not use IniFieldFile
+                            if 'IniFieldFile' in model_settings.keys(): 
+                                model_settings['IniFieldFile'] = ''                             
                         else:
                             logger.info('Cold startup')
                             model_settings['RestartFileFromBackupLocation'] = '' # None ?
@@ -333,6 +340,7 @@ def adapt(model_settings, smt_settings):
                     last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
                     tools.remove(rtc_new_file)
                     tools.copy(last_output_rtc_file, rtc_new_file)
+
 
 def finalize(model_settings, smt_settings):
     """Finalize model output"""
