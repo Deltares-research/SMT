@@ -42,6 +42,7 @@ def validate(smt_settings):
             logger.info(var)
             auto_vars.append(var)
     user_vars = []
+    logger.info('')
     logger.info('Found the following user defined variables:')
     for var in smt_settings['variables']['user']: 
         logger.info(var)
