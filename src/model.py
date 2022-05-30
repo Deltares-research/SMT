@@ -184,7 +184,17 @@ def get_input(smt_settings):
                 if 'rtc_prefix' in smt_settings['model']:
                     rtc_file = f'state_import{file_append}.xml'
                     rtc_file_location = os.path.join(smt_settings['model']['rtc_prefix'],rtc_file)
-                if partition_path_exists(os.path.join('local_database',restart_file_database), head, partition_total):
+                if smt_settings['model']['load_from_database'] == False: 
+                    logger.info('Cold startup - (neglecting restart information)')
+                    model_settings['RestartFileFromBackupLocation'] = '' # None ?
+                    model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_database)
+                    if 'rtc_prefix' in smt_settings['model']:
+                        model_settings['RTCFile'] = '../../initial/rtc/state_import.xml'
+                        model_settings['RTCFileLocation'] = rtc_file_location
+                        model_settings['RTCFileFromBackupLocation'] = ''
+                        model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',rtc_file_location)
+                    restart_level = 3
+                elif partition_path_exists(os.path.join('local_database',restart_file_database), head, partition_total):
                     logger.info('Restart file found in local_database')
                     model_settings['RestartFileFromBackupLocation'] = os.path.join('local_database',restart_file_database)
                     model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_database)
