@@ -368,7 +368,7 @@ def finalize(model_settings, smt_settings):
 
             # backup restart file to local database
             try: 
-                files = glob.glob(f'output/{model_settings["TimeIndex"]}/{model_settings["OutputDir"]}/{head}{partition_string}_{model_settings["RestartDateTimeStop"]}_rst.nc', recursive=True)
+                files = glob.glob(f'output/{model_settings["TimeIndex"]}/{model_settings["DIMR_dflowfm_workdir"]}/{model_settings["OutputDir"]}/{head}{partition_string}_{model_settings["RestartDateTimeStop"]}_rst.nc', recursive=True)
                 #files.sort(key=os.path.getmtime)
                 restart_file_database = files[0]  # get last restart time
             except: 
