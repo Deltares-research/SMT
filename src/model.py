@@ -179,8 +179,8 @@ def get_input(smt_settings):
 
                 restart_file_database = f'{head}{file_append}_rst.nc'
                 model_settings['RstIgnoreBl'] = 0
-                if 'restart_prefix' in smt_settings['model']:
-                    restart_file_database = os.path.join(smt_settings['model']['restart_prefix'],restart_file_database)
+                if 'DIMR_dflowfm_workdir' in smt_settings['model']:
+                    restart_file_database = os.path.join(smt_settings['model']['DIMR_dflowfm_workdir'],restart_file_database)
                 if 'DIMR_rtc_workdir' in smt_settings['model']:
                     rtc_file = f'state_import{file_append}.xml'
                     rtc_file_location = os.path.join(smt_settings['model']['DIMR_rtc_workdir'],rtc_file)
@@ -280,8 +280,8 @@ def get_input(smt_settings):
                 if restart_level < 3: 
                     restart_file_date_time_string = datetime.strftime(refdate + time_delta_start, '%Y%m%d_%H%M%S')
                     model_settings['RestartFile'] = f'{head}_{restart_file_date_time_string}_rst.nc'
-                    if 'restart_prefix' in smt_settings['model']:
-                        model_settings['RestartFileLocation'] = os.path.join(smt_settings['model']['restart_prefix'],model_settings['RestartFile'])  
+                    if 'DIMR_dflowfm_workdir' in smt_settings['model']:
+                        model_settings['RestartFileLocation'] = os.path.join(smt_settings['model']['DIMR_dflowfm_workdir'],model_settings['RestartFile'])  
                     else:                   
                         model_settings['RestartFileLocation'] = model_settings['RestartFile']
             yield model_settings
