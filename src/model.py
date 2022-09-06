@@ -281,12 +281,13 @@ def get_input(smt_settings):
                     restart_file_date_time_string = datetime.strftime(refdate + time_delta_start, '%Y%m%d_%H%M%S')
                     model_settings['RestartFile'] = f'{head}_{restart_file_date_time_string}_rst.nc'
                     if 'DIMR_dflowfm_workdir' in smt_settings['model']:
-                        model_settings['DIMR_dflowfm_workdir'] = smt_settings['model']['DIMR_dflowfm_workdir']
                         model_settings['RestartFileLocation'] = os.path.join(smt_settings['model']['DIMR_dflowfm_workdir'],model_settings['RestartFile'])  
                     else:                   
                         model_settings['RestartFileLocation'] = model_settings['RestartFile']
-                    if 'DIMR_rtc_workdir' in smt_settings['model']:
-                        model_settings['DIMR_rtc_workdir'] = smt_settings['model']['DIMR_rtc_workdir']
+                if 'DIMR_dflowfm_workdir' in smt_settings['model']:
+                    model_settings['DIMR_dflowfm_workdir'] = smt_settings['model']['DIMR_dflowfm_workdir']
+                if 'DIMR_rtc_workdir' in smt_settings['model']:
+                    model_settings['DIMR_rtc_workdir'] = smt_settings['model']['DIMR_rtc_workdir']
             yield model_settings
 
         # increase counter 
