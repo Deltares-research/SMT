@@ -320,7 +320,7 @@ def adapt(model_settings, smt_settings):
                     os.chmod(full_filename_new, 0o0777)
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         if 'DIMR_rtc_workdir' in smt_settings['model']:
-            rtc_new_file = os.path.join('work',smt_settings['model']['DIMR_rtc_workdir'],'state_import.xml')
+            rtc_new_file = os.path.join('output','work',smt_settings['model']['DIMR_rtc_workdir'],'state_import.xml')
 
         head, _ = os.path.splitext(smt_settings['model']['input'])
         partition_total, _ = get_partition_total(smt_settings)
@@ -333,7 +333,7 @@ def adapt(model_settings, smt_settings):
                             
             if model_settings['RestartLevel'] < 2: 
                 tools.netcdf_copy(model_settings['RestartFileFromBackupLocation'].replace(head, f'{head}{partition_string}'), 
-                                  os.path.join('work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), 
+                                  os.path.join('output','work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), 
                                   smt_settings['model']['exclude_from_database'])
                 if 'DIMR_rtc_workdir' in smt_settings['model']:
                     tools.remove(rtc_new_file)
@@ -342,7 +342,7 @@ def adapt(model_settings, smt_settings):
                     files = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"] - 1}/**/**/{head}{partition_string}**_rst.nc', recursive=True)]
                     files.sort(key=os.path.getmtime)  
                     last_output_restart_file = files[-1]
-                    tools.netcdf_append(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), 
+                    tools.netcdf_append(last_output_restart_file, os.path.join('output','work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), 
                                         smt_settings['model']['exclude_from_database'])
                     # if 'DIMR_rtc_workdir' in smt_settings['model']:
                     #     last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
@@ -350,7 +350,7 @@ def adapt(model_settings, smt_settings):
                     #     tools.copy(last_output_rtc_file, rtc_new_file)                
             elif model_settings['RestartLevel'] == 2: 
                 last_output_restart_file = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"] - 1}/**/**/{head}{partition_string}**_rst.nc', recursive=True)][-1]
-                tools.netcdf_copy(last_output_restart_file, os.path.join('work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), [])   # copy all data
+                tools.netcdf_copy(last_output_restart_file, os.path.join('output','work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), [])   # copy all data
                 if 'DIMR_rtc_workdir' in smt_settings['model']:
                     last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
                     tools.remove(rtc_new_file)
