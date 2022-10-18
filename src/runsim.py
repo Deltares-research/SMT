@@ -63,6 +63,7 @@ def runner(settings, clean, backup):
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         tools.guaranteedir('central_database')
         tools.guaranteedir('local_database')
+        tools.guaranteedir('output')
 
     # get model input 
     for model_settings in model.get_input(smt_settings): 
@@ -73,21 +74,20 @@ def runner(settings, clean, backup):
             continue
 
         # apply input 
-        if os.path.exists('work'):
-            shutil.rmtree('work')
-        shutil.copytree('source','work')
+        if os.path.exists(os.path.join('output','work')):
+            shutil.rmtree(os.path.join('output','work'))
+        shutil.copytree('source',os.path.join('output','work'))
         model.adapt(model_settings, smt_settings)
-        tools.remove(os.path.join('work','**','**.template'))
+        tools.remove(os.path.join('output','work','**','**.template'))
    
         # run model step
         platform_system = platform.system()
         app = Application(run_script=smt_settings['application']['command'][platform_system],
                           run_flags=smt_settings['application']['flags'][platform_system])
-        app.run('work', smt_settings['model']['input'])
+        app.run(os.path.join('output','work'), smt_settings['model']['input'])
 
         # finalize model step
-        tools.guaranteedir('output')
-        shutil.move('work', new_output_folder)
+        shutil.move(os.path.join('output','work'), new_output_folder)
         model.finalize(model_settings, smt_settings)
 
 
