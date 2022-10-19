@@ -87,8 +87,8 @@ def runner(settings, clean, backup):
         app.run(os.path.join('output','work'), smt_settings['model']['input'])
 
         # finalize model step
-        shutil.move(os.path.join('output','work'), new_output_folder)
         model.finalize(model_settings, smt_settings)
+        shutil.move(os.path.join('output','work'), new_output_folder)
 
 
 if __name__ == '__main__':
