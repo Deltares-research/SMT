@@ -40,6 +40,7 @@ class Application():
 
     def run(self, workdir, run_entry):
         """Running routine for Application Class"""
+        original_dir = os.getcwd()
         os.chdir(workdir)
         command = self.run_script.copy()
         if self.run_flags != None: 
@@ -57,5 +58,5 @@ class Application():
         #if exitcode != 0: 
         #    raise CalledProcessError
         logger.info('Simulation finished')
-        os.chdir('..')
+        os.chdir(original_dir)
 
