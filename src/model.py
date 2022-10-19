@@ -372,16 +372,16 @@ def finalize(model_settings, smt_settings):
 
             # backup restart file to local database
             try: 
-                files = glob.glob(f'output/{model_settings["TimeIndex"]}/{model_settings["DIMR_dflowfm_workdir"]}/{model_settings["OutputDir"]}/{head}{partition_string}_{model_settings["RestartDateTimeStop"]}_rst.nc', recursive=True)
+                files = glob.glob(f'output/work/{model_settings["DIMR_dflowfm_workdir"]}/{model_settings["OutputDir"]}/{head}{partition_string}_{model_settings["RestartDateTimeStop"]}_rst.nc', recursive=True)
                 #files.sort(key=os.path.getmtime)
                 restart_file_database = files[0]  # get last restart time
             except: 
-                logger.error('Check .dia file')
+                logger.error('Check work folder for error message')
                 raise IndexError
             tools.netcdf_copy(restart_file_database, model_settings['RestartFileToBackupLocation'].replace(head, f'{head}{partition_string}'),  
                 smt_settings['model']['exclude_from_database'])
             if 'DIMR_rtc_workdir' in smt_settings['model']:
-                rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'])+'/**/**/state_export.xml', recursive=True)][-1]
+                rtc_file = [rtc for rtc in glob.glob('output/work/**/**/state_export.xml', recursive=True)][-1]
                 tools.copy(rtc_file, model_settings['RTCFileToBackupLocation'])
 
 def get_partition_total(smt_settings): 
