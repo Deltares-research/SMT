@@ -376,7 +376,7 @@ def finalize(model_settings, smt_settings):
                 #files.sort(key=os.path.getmtime)
                 restart_file_database = files[0]  # get last restart time
             except: 
-                logger.error('Check work folder for error message')
+                logger.error('Check output/work folder for error message')
                 raise IndexError
             tools.netcdf_copy(restart_file_database, model_settings['RestartFileToBackupLocation'].replace(head, f'{head}{partition_string}'),  
                 smt_settings['model']['exclude_from_database'])
