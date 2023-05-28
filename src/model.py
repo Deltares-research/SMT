@@ -101,9 +101,13 @@ def set_input(smt_settings, time_index):
                         return model_settings
                 else:     
                     try: 
-                        value = smt_user[key][list(value.keys())[0]][model_settings[list(value.keys())[0]]]
-                        model_settings[key] = value 
-                        dependance_map[key] = list(smt_user[key].keys())[0]
+                        if model_settings[list(value.keys())[0]] in smt_user[key][list(value.keys())[0]].keys():
+                            value = smt_user[key][list(value.keys())[0]][model_settings[list(value.keys())[0]]]
+                            model_settings[key] = value 
+                            dependance_map[key] = list(smt_user[key].keys())[0]
+                        else: 
+                            logger.error(f'Error setting {key}, from {list(value.keys())[0]} = {model_settings[list(value.keys())[0]]}')
+                            raise IndexError(f'Error setting {key}, from {list(value.keys())[0]} = {model_settings[list(value.keys())[0]]}')
                     except KeyError:
                         user_vars.append(key)
                         
@@ -111,6 +115,7 @@ def set_input(smt_settings, time_index):
                 model_settings[key] = value
                 dependance_map[key] = ''
             prev_key = key    
+            logger.info(f'Found {key}: {value}')
     elif smt_settings['model']['simulation_type'] == 'simulation-list':
         model_settings = {}
         dependance_map = {} 
