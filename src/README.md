@@ -11,9 +11,10 @@ It was first developed in the context of the sustainable fairway in the Rhine [1
 Install Anaconda (This can be downloaded from the Anaconda website [2]) or Miniconda [7]. See also the Anaconda docs for more information on environments [8]
 Start an Anaconda command prompt from the Windows start menu, or activate the correct paths under linux. 
 
+On Deltares h6c7 linux cluster Anaconda can be activated using 
+ `module load anaconda3`
  
 Next, generate an environment with the following dependencies 
-
  `conda create --name smt2 python=3 mako pyyaml click pandas netCDF4`
 
 Some of the example simulations require extra packages. To install these run the following commands: 
