@@ -273,7 +273,7 @@ def get_input(smt_settings):
                 time_start_seconds = time_start*tunit_in_seconds
                 time_start_post_spinup_seconds = (time_start+model_settings['SpinupTime'])*tunit_in_seconds
                 time_stop_seconds = time_stop*tunit_in_seconds
-                time_duration_post_spinup_seconds = np.float(model_settings['TimeDuration'])*tunit_in_seconds
+                time_duration_post_spinup_seconds = float(model_settings['TimeDuration'])*tunit_in_seconds
                 model_settings['MapInterval'] = f"{time_duration_post_spinup_seconds} {time_start_post_spinup_seconds} {time_stop_seconds}"
                 model_settings['RstInterval'] = f"{time_duration_post_spinup_seconds} {time_start_post_spinup_seconds} {time_stop_seconds}"
                 model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
