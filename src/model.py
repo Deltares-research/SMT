@@ -274,7 +274,7 @@ def get_input(smt_settings):
                 time_start_seconds = time_start*tunit_in_seconds
                 time_start_post_spinup_seconds = np.round((time_start+model_settings['SpinupTime'])*tunit_in_seconds,decimals=8)
                 time_stop_seconds = time_stop*tunit_in_seconds
-                rst_time_duration_post_spinup_seconds = np.round(float(model_settings['TimeDuration'])*tunit_in_seconds),decimals=8)
+                rst_time_duration_post_spinup_seconds = np.round(float(model_settings['TimeDuration'])*tunit_in_seconds,decimals=8)
                 if 'MapOutputCount' not in model_settings.keys():
                     model_settings['MapOutputCount'] = 1
                 map_time_duration_post_spinup_seconds = np.round(float(model_settings['TimeDuration'])*tunit_in_seconds/float(model_settings['MapOutputCount']),decimals=8)
