@@ -9,6 +9,7 @@ import tools
 from datetime import datetime, timedelta
 import pandas as pd 
 import numpy as np
+import math 
 
 global logger 
 
@@ -273,9 +274,26 @@ def get_input(smt_settings):
                 time_start_seconds = time_start*tunit_in_seconds
                 time_start_post_spinup_seconds = np.round((time_start+model_settings['SpinupTime'])*tunit_in_seconds,decimals=8)
                 time_stop_seconds = time_stop*tunit_in_seconds
-                time_duration_post_spinup_seconds = np.round(float(model_settings['TimeDuration'])*tunit_in_seconds,decimals=8)
-                model_settings['MapInterval'] = f"{time_duration_post_spinup_seconds:.8f} {time_start_post_spinup_seconds:.8f} {time_stop_seconds:.8f}"
-                model_settings['RstInterval'] = f"{time_duration_post_spinup_seconds:.8f} {time_start_post_spinup_seconds:.8f} {time_stop_seconds:.8f}"
+                rst_time_duration_post_spinup_seconds = np.round(float(model_settings['TimeDuration'])*tunit_in_seconds),decimals=8)
+                if 'MapOutputCount' not in model_settings.keys():
+                    model_settings['MapOutputCount'] = 1
+                map_time_duration_post_spinup_seconds = np.round(float(model_settings['TimeDuration'])*tunit_in_seconds/float(model_settings['MapOutputCount']),decimals=8)
+                if math.isclose(map_time_duration_post_spinup_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
+                    logger.debug(f'MapIntervalStep = {map_time_duration_post_spinup_seconds}')
+                    logger.debug(f'DtUser = {model_settings["DtUser"]}')
+                    logger.debug(f'MapIntervalStep/DtUser = {map_time_duration_post_spinup_seconds % model_settings["DtUser"]}')
+                    logger.error('MapInterval is not a multple of DtUser')
+                    raise ValueError('MapInterval is not a multple of DtUser')
+                if math.isclose(time_start_post_spinup_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
+                    logger.debug(f'MapIntervalStart = {map_time_duration_post_spinup_seconds}')
+                    logger.error('MapIntervalStart is not a multple of DtUser')
+                    raise ValueError('MapIntervalStart is not a multple of DtUser')
+                if math.isclose(time_stop_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
+                    logger.debug(f'MapIntervalStop = {time_stop_seconds}')
+                    logger.error('MapIntervalStop is not a multple of DtUser')
+                    raise ValueError('MapIntervalStop is not a multple of DtUser')
+                model_settings['MapInterval'] = f"{map_time_duration_post_spinup_seconds:.8f} {time_start_post_spinup_seconds:.8f} {time_stop_seconds:.8f}"
+                model_settings['RstInterval'] = f"{rst_time_duration_post_spinup_seconds:.8f} {time_start_post_spinup_seconds:.8f} {time_stop_seconds:.8f}"
                 model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
                 model_settings['RestartDateTimeStop'] = datetime.strftime(refdate + timedelta(seconds = time_stop_seconds), '%Y%m%d_%H%M%S')
                 time_start = model_settings['TStop']
