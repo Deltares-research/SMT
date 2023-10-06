@@ -278,17 +278,17 @@ def get_input(smt_settings):
                 if 'MapOutputCount' not in model_settings.keys():
                     model_settings['MapOutputCount'] = 1
                 map_time_duration_post_spinup_seconds = np.round(float(model_settings['TimeDuration'])*tunit_in_seconds/float(model_settings['MapOutputCount']),decimals=8)
-                if math.isclose(map_time_duration_post_spinup_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
+                if not math.isclose(map_time_duration_post_spinup_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
                     logger.debug(f'MapIntervalStep = {map_time_duration_post_spinup_seconds}')
                     logger.debug(f'DtUser = {model_settings["DtUser"]}')
                     logger.debug(f'MapIntervalStep/DtUser = {map_time_duration_post_spinup_seconds % model_settings["DtUser"]}')
                     logger.error('MapInterval is not a multple of DtUser')
                     raise ValueError('MapInterval is not a multple of DtUser')
-                if math.isclose(time_start_post_spinup_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
+                if not math.isclose(time_start_post_spinup_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
                     logger.debug(f'MapIntervalStart = {map_time_duration_post_spinup_seconds}')
                     logger.error('MapIntervalStart is not a multple of DtUser')
                     raise ValueError('MapIntervalStart is not a multple of DtUser')
-                if math.isclose(time_stop_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
+                if not math.isclose(time_stop_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
                     logger.debug(f'MapIntervalStop = {time_stop_seconds}')
                     logger.error('MapIntervalStop is not a multple of DtUser')
                     raise ValueError('MapIntervalStop is not a multple of DtUser')
