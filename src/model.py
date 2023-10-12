@@ -9,7 +9,6 @@ import tools
 from datetime import datetime, timedelta
 import pandas as pd 
 import numpy as np
-import math 
 
 global logger 
 
@@ -253,11 +252,7 @@ def get_input(smt_settings):
                             restart_level = 3
                 model_settings['RestartLevel'] = restart_level        
                 model_settings['SpinupTime'] = model_settings['SpinupTime'][restart_level]
-                model_settings['MorStt'] = model_settings['SpinupTime']
-
                 model_settings['TStart'] = time_start
-                time_stop = time_start + model_settings['TimeDuration'] + model_settings['SpinupTime']
-                model_settings['TStop'] = time_stop
                 if model_settings['TUnit'] == 'S':
                     tunit_in_seconds = 1
                     time_delta_start = timedelta(seconds = time_start)
@@ -270,38 +265,77 @@ def get_input(smt_settings):
                 elif model_settings['TUnit'] == 'D':
                     tunit_in_seconds = 86400
                     time_delta_start = timedelta(days = time_start)
-                refdate = datetime.strptime(model_settings['ReferenceDate'], '%Y%m%d')
-                time_start_seconds = time_start*tunit_in_seconds
-                time_start_post_spinup_seconds = np.round((time_start+model_settings['SpinupTime'])*tunit_in_seconds,decimals=8)
-                time_stop_seconds = time_stop*tunit_in_seconds
-                rst_time_duration_post_spinup_seconds = np.round(float(model_settings['TimeDuration'])*tunit_in_seconds,decimals=8)
                 if 'MapOutputCount' not in model_settings.keys():
                     model_settings['MapOutputCount'] = 1
+                # At this point we have read the desired SpinupTime and TimeDuration of the morphodynamic activity. 
+                # Now we have to find a DtUserModel which is close to the desired DtUser and allows for the setting of different DtUser related outputs
+                #
+                # The TimeDuration should not be altered. The total simulation time TStop-Start should be a multiple of DtUserModel
+                #   DtUserModel x N = TStop-TStart
+                #
+                # In addition the MapIntervalStep should also be a multiple of DtUserModel
+                #   DtUserModel x M = MapIntervalStep
+                #
+                # This implies that the TimeDuration should also be a multiple of DtUserModel
+                #   DtUserModel x M x P = TimeDuration
+                #
+                # As a consequence the SpinUpTimeModel should be a multiple of the DtUserModel as well. 
+                #   DtUserModel x Q = SpinUpTimeModel
+                #
+                # To obtain the DtUserModel we search for a DtUserModel which is close to the proposed DtUser in the input file. 
+                divFactor = 100
+                divisors = tools.divisors(model_settings['TimeDuration']*tunit_in_seconds*divFactor)
+                model_settings['DtUserModel'] = divisors[np.argmin([abs(model_settings['DtUser'] - k/float(model_settings['MapOutputCount']*divFactor)) for k in divisors])]/float(model_settings['MapOutputCount']*divFactor)
+                #  
+                # Next the SpinupTimeModel is increased to be a multiple of the DtUserModel
+                model_settings['SpinupTimeModel'] = np.ceil(model_settings['SpinupTime']/model_settings['DtUserModel'])*model_settings['DtUserModel']/tunit_in_seconds
+                model_settings['HisIntervalStepModel'] = np.ceil(model_settings['HisIntervalStep']/model_settings['DtUserModel'])*model_settings['DtUserModel']
+                model_settings['TrtDtModel'] = model_settings['DtUserModel']
+
+                model_settings['MorStt'] = model_settings['SpinupTimeModel']
+                time_stop = time_start + model_settings['TimeDuration'] + model_settings['SpinupTimeModel']
+                model_settings['TStop'] = time_stop
+                refdate = datetime.strptime(model_settings['ReferenceDate'], '%Y%m%d')
+                time_start_seconds = time_start*tunit_in_seconds
+                time_start_post_spinup_seconds = np.round((time_start+model_settings['SpinupTimeModel'])*tunit_in_seconds,decimals=8)
+                time_stop_seconds = time_stop*tunit_in_seconds
+                rst_time_duration_post_spinup_seconds = np.round(float(model_settings['TimeDuration'])*tunit_in_seconds,decimals=8)
                 map_time_duration_post_spinup_seconds = np.round(float(model_settings['TimeDuration'])*tunit_in_seconds/float(model_settings['MapOutputCount']),decimals=8)
-                if not math.isclose(map_time_duration_post_spinup_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
-                    logger.debug(f'MapIntervalStep = {map_time_duration_post_spinup_seconds}')
-                    logger.debug(f'DtUser = {model_settings["DtUser"]}')
-                    logger.debug(f'MapIntervalStep/DtUser = {map_time_duration_post_spinup_seconds % model_settings["DtUser"]}')
-                    logger.error('MapInterval is not a multple of DtUser')
-                    raise ValueError('MapInterval is not a multple of DtUser')
-                if not math.isclose(time_start_post_spinup_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
-                    logger.debug(f'MapIntervalStart = {map_time_duration_post_spinup_seconds}')
-                    logger.error('MapIntervalStart is not a multple of DtUser')
-                    raise ValueError('MapIntervalStart is not a multple of DtUser')
-                if not math.isclose(time_stop_seconds % model_settings['DtUser'], 0.0, rel_tol=1e-10):
-                    logger.debug(f'MapIntervalStop = {time_stop_seconds}')
-                    logger.error('MapIntervalStop is not a multple of DtUser')
-                    raise ValueError('MapIntervalStop is not a multple of DtUser')
+                his_time_near_start = time_stop_seconds-np.floor((time_stop_seconds-time_start_seconds)/model_settings['HisIntervalStepModel'])*model_settings['HisIntervalStepModel']
+                
+                validate_output_time(map_time_duration_post_spinup_seconds, model_settings['DtUserModel'], 'MapIntervalStepModel', 'DtUserModel')
+                #if not tools.is_multiple():
+                #    logger.debug(f' = {map_time_duration_post_spinup_seconds}')
+                #    logger.debug(f'DtUserModel = {model_settings["DtUserModel"]}')
+                #    logger.debug(f'MapIntervalStep % DtUserModel = {map_time_duration_post_spinup_seconds % model_settings["DtUserModel"]}')
+                #    logger.error('MapInterval is not a multple of DtUserModel')
+                #    raise ValueError('MapInterval is not a multple of DtUserModel')
+                validate_output_time(time_start_post_spinup_seconds, model_settings['DtUserModel'], 'MapIntervalStart', 'DtUserModel')
+                #if not tools.is_multiple(time_start_post_spinup_seconds, model_settings['DtUserModel']):
+                #    logger.debug(f'MapIntervalStart = {map_time_duration_post_spinup_seconds}')
+                #    logger.error('MapIntervalStart is not a multple of DtUserModel')
+                #    raise ValueError('MapIntervalStart is not a multple of DtUserModel')
+                validate_output_time(time_stop_seconds, model_settings['DtUserModel'], 'MapIntervalStop', 'DtUserModel')
+                #if not tools.is_multiple(time_stop_seconds, model_settings['DtUserModel']):
+                #    logger.debug(f'MapIntervalStop = {time_stop_seconds}')
+                #    logger.error('MapIntervalStop is not a multple of DtUserModel')
+                #    raise ValueError('MapIntervalStop is not a multple of DtUserModel')
                 model_settings['MapInterval'] = f"{map_time_duration_post_spinup_seconds:.8f} {time_start_post_spinup_seconds:.8f} {time_stop_seconds:.8f}"
                 model_settings['RstInterval'] = f"{rst_time_duration_post_spinup_seconds:.8f} {time_start_post_spinup_seconds:.8f} {time_stop_seconds:.8f}"
-                model_settings['RestartDateTime'] = datetime.strftime(refdate + time_delta_start, '%Y%m%d%H%M%S')
-                model_settings['RestartDateTimeStop'] = datetime.strftime(refdate + timedelta(seconds = time_stop_seconds), '%Y%m%d_%H%M%S')
+                model_settings['RestartDateTime'] = datetime.strftime(refdate + timedelta(seconds = np.round(time_delta_start.total_seconds())), '%Y%m%d%H%M%S')
+                model_settings['RestartDateTimeStop'] = datetime.strftime(refdate + timedelta(seconds = np.round(time_stop_seconds)), '%Y%m%d_%H%M%S')
+                validate_output_time(his_time_near_start, model_settings['DtUserModel'], 'HisIntervalStart', 'DtUserModel')
+                #if not tools.is_multiple(his_time_near_start, model_settings['DtUserModel']):
+                #    logger.debug(f'HisIntervalStart = {his_time_near_start}')
+                #    logger.error('HisIntervalStart is not a multple of DtUserModel')
+                #    raise ValueError('HisIntervalStart is not a multple of DtUserModel')
+                model_settings['HisInterval'] = f"{model_settings['HisIntervalStepModel']:.8f} {his_time_near_start:.8f} {time_stop_seconds:.8f}"
                 time_start = model_settings['TStop']
 
                 model_settings['RestartFile'] = ''
                 model_settings['RestartFileLocation'] = '' # restart_file_database
                 if restart_level < 3: 
-                    restart_file_date_time_string = datetime.strftime(refdate + time_delta_start, '%Y%m%d_%H%M%S')
+                    restart_file_date_time_string = datetime.strftime(refdate + timedelta(seconds = np.round(time_delta_start.total_seconds())), '%Y%m%d_%H%M%S')
                     model_settings['RestartFile'] = f'{head}_{restart_file_date_time_string}_rst.nc'
                     if 'DIMR_dflowfm_workdir' in smt_settings['model']:
                         model_settings['RestartFileLocation'] = os.path.join(smt_settings['model']['DIMR_dflowfm_workdir'],model_settings['RestartFile'])  
@@ -431,3 +465,9 @@ def partition_path_exists(restartfile, head, partition_total):
             return False
     return True
         
+def validate_output_time(number, factor, number_description, factor_description):
+    if not tools.is_multiple(number, factor):
+        logger.debug(f'{number_description} = {number}')
+        logger.debug(f'{factor_description} = {factor}')
+        logger.error(f'{number_description} is not a multple of {factor_description}')
+        raise ValueError(f'{number_description} is not a multple of {factor_description}')
