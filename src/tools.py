@@ -9,6 +9,7 @@ import netCDF4
 from datetime import datetime, timedelta
 import time # for timezone information 
 import shutil
+import math 
 
 global logger 
 
@@ -131,3 +132,14 @@ def netcdf_append(src_netcdf, dst_netcdf, append_list):
                     #    logger.info("{} -- {}".format(attrname, getattr(variable, attrname)))
                     dst.variables[name].setncatts(src.variables[name].__dict__)
                 continue
+
+def divisors(n):
+    return [x for x in range(1, n+1) if n % x == 0]
+    
+def is_multiple(number,factor): 
+    c = 0.0 
+    while c < number: 
+        c = c + factor
+        if math.isclose(c, number): 
+            return True
+    return False
