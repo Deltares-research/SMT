@@ -469,5 +469,5 @@ def validate_output_time(number, factor, number_description, factor_description)
     if not tools.is_multiple(number, factor):
         logger.debug(f'{number_description} = {number}')
         logger.debug(f'{factor_description} = {factor}')
-        logger.error(f'{number_description} is not a multple of {factor_description}')
-        raise ValueError(f'{number_description} is not a multple of {factor_description}')
+        logger.debug(f'{number_description} is not a multple of {factor_description}')
+        #raise ValueError(f'{number_description} is not a multple of {factor_description}')
