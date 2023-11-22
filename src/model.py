@@ -267,6 +267,8 @@ def get_input(smt_settings):
                     time_delta_start = timedelta(days = time_start)
                 if 'MapOutputCount' not in model_settings.keys():
                     model_settings['MapOutputCount'] = 1
+                if 'Dtfacmax' not in model_settings.keys():
+                    model_settings['Dtfacmax'] = 1.1                    
                 # At this point we have read the desired SpinupTime and TimeDuration of the morphodynamic activity. 
                 # Now we have to find a DtUserModel which is close to the desired DtUser and allows for the setting of different DtUser related outputs
                 #
