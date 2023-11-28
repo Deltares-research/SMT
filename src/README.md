@@ -12,7 +12,7 @@ Install Anaconda (This can be downloaded from the Anaconda website [2]) or Minic
 Start an Anaconda command prompt from the Windows start menu, or activate the correct paths under linux. 
 
 On Deltares h6c7 linux cluster Anaconda can be activated using 
- `module load anaconda3`
+ `module load anaconda3/2021.05`
  
 Next, generate an environment with the following dependencies 
  `conda create --name smt2 python=3 mako pyyaml click pandas netCDF4`
