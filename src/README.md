@@ -17,8 +17,10 @@ On Deltares h6c7 linux cluster Anaconda can be activated using
 Next, generate an environment with the following dependencies 
  `conda create --name smt2 python=3 mako pyyaml click pandas netCDF4`
 
-On the h7, generate an environment with the following dependencies with the name `smt2_h7` - because your home folder used on the h6c7 is still accessible from h7, but the conda version is different. 
+On the h7 linux cluster Anaconda can be activated using 
  `module load anaconda3/miniconda3`
+ 
+Next generate an environment with the following dependencies with the name `smt2_h7` - because your home folder used on the h6c7 is still accessible from h7, but the conda version is different. 
  `conda create --name smt2_h7 python=3 mako pyyaml click pandas netCDF4`
 
 Some of the example simulations require extra packages. To install these run the following commands: 
