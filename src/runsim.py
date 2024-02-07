@@ -15,12 +15,7 @@ import model
 from application import Application
 
 def print_version(ctx, param, value):
-    try: 
-        import netCDF4
-    except ImportError:
-        import h5netcdf.legacyapi as netCDF4
-    else:
-        raise ImportError('Netcdf library could not be loaded.')
+    import netCDF4
     if not value or ctx.resilient_parsing:
         return
     click.echo('SMT version 2.0.' + '$Revision$'.split(' ')[1])
