@@ -5,12 +5,7 @@ import os
 import logging
 import logging.config
 import glob
-try: 
-    import netCDF4
-except ImportError:
-    import h5netcdf.legacyapi as netCDF4
-else:
-    raise ImportError('Netcdf library could not be loaded.')
+import netCDF4
 from datetime import datetime, timedelta
 import time # for timezone information 
 import shutil
