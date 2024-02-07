@@ -5,7 +5,7 @@ import os
 import logging
 import logging.config
 import glob
-try 
+try: 
     import netCDF4
 except ImportError:
     import h5netcdf.legacyapi as netCDF4
