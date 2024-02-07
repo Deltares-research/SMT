@@ -15,7 +15,7 @@ import model
 from application import Application
 
 def print_version(ctx, param, value):
-    try 
+    try: 
         import netCDF4
     except ImportError:
         import h5netcdf.legacyapi as netCDF4
