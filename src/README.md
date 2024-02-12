@@ -11,17 +11,27 @@ It was first developed in the context of the sustainable fairway in the Rhine [1
 Install Anaconda (This can be downloaded from the Anaconda website [2]) or Miniconda [7]. See also the Anaconda docs for more information on environments [8]
 Start an Anaconda command prompt from the Windows start menu, or activate the correct paths under linux. 
 
-On Deltares h6c7 linux cluster Anaconda can be activated using 
- `module load anaconda3/2021.05`
- 
-Next, generate an environment with the following dependencies 
- `conda create --name smt2 python=3 mako pyyaml click pandas netCDF4`
+On the h7 linux cluster Anaconda can be activated using the following steps:
 
-On the h7 linux cluster Anaconda can be activated using 
- `module load anaconda3/miniconda3`
- 
-Next generate an environment with the following dependencies with the name `smt2_h7` - because your home folder used on the h6c7 is still accessible from h7, but the conda version is different. 
+Load the anaconda3 module
+ `module load anaconda3/miniconda`
+
+Next activate conda
+ `conda init`
+
+Now should source the bash startup script again to really activate the conda environment
+ `source ~/.bashrc`
+If succesful, you should see (base) at the start of your prompt.
+
+Next set a writable directory for your packages to be installed
+ `conda config --add pkgs_dirs ~/.conda/pkgs/`
+Next generate an environment with the following dependencies with the name `smt2_h7` - because your home folder used on the h6c7 is still accessible from h7, but the conda version is different.
+
  `conda create --name smt2_h7 python=3 mako pyyaml click pandas netCDF4`
+To run the simulation use the start_h7.sh script
+
+ `./start_h7.sh`  
+Thats it - your model should now run.
 
 Some of the example simulations require extra packages. To install these run the following commands: 
  `conda activate smt2`  
@@ -30,7 +40,7 @@ Some of the example simulations require extra packages. To install these run the
 
 ## Running 
 To run the SMT, first activate the `smt` environment
- `conda activate smt2`
+ `conda activate smt2_h7`
 
 
 Then simply call runsim.py with a dedicated .yml file from the folder where the .yml lives
