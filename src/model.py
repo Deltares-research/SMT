@@ -182,6 +182,7 @@ def get_input(smt_settings):
                 head, _ = os.path.splitext(smt_settings['model']['input'])
                 file_append = model_settings['FileAppendix']
 
+                # Set default names
                 restart_file_database = f'{head}{file_append}_rst.nc'
                 model_settings['RstIgnoreBl'] = 0
                 if 'DIMR_dflowfm_workdir' in smt_settings['model']:
@@ -189,6 +190,8 @@ def get_input(smt_settings):
                 if 'DIMR_rtc_workdir' in smt_settings['model']:
                     rtc_file = f'state_import{file_append}.xml'
                     rtc_file_location = os.path.join(smt_settings['model']['DIMR_rtc_workdir'],rtc_file)
+
+                # Ignore database option
                 if smt_settings['model']['load_from_database'] == False: 
                     logger.info('Cold startup - (neglecting restart information)')
                     model_settings['RestartFileFromBackupLocation'] = '' # None ?
@@ -199,6 +202,8 @@ def get_input(smt_settings):
                         model_settings['RTCFileFromBackupLocation'] = ''
                         model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',rtc_file_location)
                     restart_level = 3
+                
+                # Local database information exists
                 elif partition_path_exists(os.path.join('local_database',restart_file_database), head, partition_total):
                     logger.info('Restart file found in local_database')
                     model_settings['RestartFileFromBackupLocation'] = os.path.join('local_database',restart_file_database)
@@ -212,6 +217,7 @@ def get_input(smt_settings):
                         model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',rtc_file_location)
                     restart_level = 0
                 else: 
+                    # Local database does not exist and central database does
                     logger.info('Restart file not found in local_database')
                     if partition_path_exists(os.path.join('central_database',restart_file_database), head, partition_total):
                         logger.info('Restart file found in central_database')
@@ -226,8 +232,10 @@ def get_input(smt_settings):
                             model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',rtc_file_location)
                         restart_level = 1
                     else: 
+                        # Local database and central database do not exist
                         logger.info('Restart file not found in central_database')
                         if time_index > 0:
+                            # If this is not the first step, restart from the previous result
                             logger.info('Starting from final result of last simulation')
                             model_settings['RestartFileFromBackupLocation'] = '' 
                             model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_database)
@@ -241,6 +249,7 @@ def get_input(smt_settings):
                             if 'IniFieldFile' in model_settings.keys(): 
                                 model_settings['IniFieldFile'] = ''                             
                         else:
+                            # If this is the first step, do not restart from any database. 
                             logger.info('Cold startup')
                             model_settings['RestartFileFromBackupLocation'] = '' # None ?
                             model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_database)
