@@ -8,7 +8,7 @@ It was first developed in the context of the sustainable fairway in the Rhine [1
 
 ## Installation
 
-Install Anaconda (This can be downloaded from the Anaconda website [2]) or Miniconda [7]. See also the Anaconda docs for more information on environments [8]
+Install Anaconda (This can be downloaded from the Anaconda website [2]) or Miniconda [3]. See also the Anaconda docs for more information on environments [4]
 Start an Anaconda command prompt from the Windows start menu, or activate the correct paths under linux. 
 
 On the h7 linux cluster Anaconda can be activated using the following steps:
@@ -28,6 +28,8 @@ Next set a writable directory for your packages to be installed
 Next generate an environment with the following dependencies with the name `smt2_h7` - because your home folder used on the h6c7 is still accessible from h7, but the conda version is different.
 
  `conda create --name smt2_h7 python=3 mako pyyaml click pandas netCDF4`
+
+<!--
 To run the simulation use the start_h7.sh script
 
  `./start_h7.sh`  
@@ -37,11 +39,11 @@ Some of the example simulations require extra packages. To install these run the
  `conda activate smt2`  
  `conda install geopandas`
  `conda install matplotlib`
+--> 
 
 ## Running 
 To run the SMT, first activate the `smt` environment
  `conda activate smt2_h7`
-
 
 Then simply call runsim.py with a dedicated .yml file from the folder where the .yml lives
  `python src/runsim.py` 
@@ -62,16 +64,16 @@ Options:
 
 ```
 Python files 
-- application.py - Application class 
-- model.py       - Model preparation and adaptation
-- runsim.py      - Main routine
-- tools.py       - Various helper tools
+- application.py   - Application class 
+- model.py         - Model preparation and adaptation
+- runsim.py        - Main routine
+- tools.py         - Various helper tools
+- interpolation.py - Interpolation tools 
 
 Other files 
 - logging.conf   - Configuration file for logger 
-- app\           - Folder containing scripts for running applications 
 ```
-## Model file structure
+## Example model file structure
 
 ```
 - smt.yml                     - configuration file for the SMT
@@ -80,11 +82,15 @@ Other files
 - boundary_conditions\        - 
 +-- bnd_filename.bc.template  - example template file for boundary conditions  
 - central_database\           - initial restart information if available
-- local_database\             - restart information updated after running the simulation
-- work\                       - adapted source folder, used for running simulation
+- local_database\             - restart information updated during running the simulation
 - output\                     - contains copies of work folder after completing the run
++-- work\                     - adapted source folder, used for running simulation
++-- 0\                        - first simulation output 
++-- ...                       - next simulation outputs
+
 ```
 
+<!-- 
 ## Example simulations
 
 In the examples folder you may find the following examples
@@ -105,11 +111,11 @@ In the examples folder you may find the following examples
 
 <!--- ## Frequently asked questions ---> 
 
-
-## Known Issues --->
+<!--
+## Known Issues 
 Unfortunately, sometimes some known issues may appear: 
 - Delft3D-FM sometimes does not close off the process properly, locking the work folder for instance. To work around this, it may be necessary to restart your console window.
-
+-->
 
 ## Licence
 Copyright (C) 2020  Deltares
@@ -125,6 +131,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+<!--
 ## Troubleshooting 
 
 1. Error about module not found 
@@ -137,13 +144,25 @@ ModuleNotFoundError: No module named 'click'
 ```
 * Check that your `smt2` environment is correctly loaded  
 * If it is, try reinstalling the package 
-
+--> 
 
 ## References
 
 [1] Yossef, M. F. M., Jagers, H. R. A., Van Vuren, S., and Sieben, J. (2008). Innovative techniques in modelling large-scale river morphology, River Flow 2008 - Proc. Int. Conf. Fluvial Hydraulics, Çesme, Izmir, Turkey 1065-1074
 
 [2] Anaconda (2020), Software package available from https://www.anaconda.com/products/individual
+
+[3] Miniconda (2020), Lightweight Anaconda package available from https://docs.conda.io/en/latest/miniconda.html
+
+[4] Anaconda (2020b), https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands
+
+<!--- at revision 16306 --->
+
+<!---Van Vuren, B.G., Hauschild, A., Ottevanger, W., Crebas, J.I., Yossef M.F.M. (2008) Voorspelinstrument duurzame vaarweg: reducing computation time, Deltares (WL | Delft Hydraulics) Report
+
+Yossef, M. F. M., Sloff, K. (2012). Detailed Modelling of River Morphological Response to Climate Change Scenarios, River Flow 2012 - International Conference on Fluvial Hydraulics, 845 - 853
+
+Ottevanger, W., Giri, S. Sloff, C.J. (2015): Sustainable Fairway Rhinedelta II: Effects of yearly bed stabilisation nourishments, Delta Program measures and training walls. Deltares Project 1209175.
 
 [3] Malone, T., and A. D. Parr (2008), Bend losses in rectangular culverts, Tech. Rep. K-TRAN: KU-05-5, Kansas Department of Transportation and Kansas State University.
 
@@ -153,14 +172,4 @@ ModuleNotFoundError: No module named 'click'
 
 [6] Berends, K., R. Daggenvoorde and K. Sloff (2020), Morphological models for IRM: Maas 1D. Deltares report 11203684-015-ZWS-0001. 
 
-[7] Miniconda (2020), Lightweight Anaconda package available from https://docs.conda.io/en/latest/miniconda.html
-
-[8] Anaconda (2020b), https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands
-
-<!--- at revision 16306 --->
-
-<!---Van Vuren, B.G., Hauschild, A., Ottevanger, W., Crebas, J.I., Yossef M.F.M. (2008) Voorspelinstrument duurzame vaarweg: reducing computation time, Deltares (WL | Delft Hydraulics) Report
-
-Yossef, M. F. M., Sloff, K. (2012). Detailed Modelling of River Morphological Response to Climate Change Scenarios, River Flow 2012 - International Conference on Fluvial Hydraulics, 845 - 853
-
-Ottevanger, W., Giri, S. Sloff, C.J. (2015): Sustainable Fairway Rhinedelta II: Effects of yearly bed stabilisation nourishments, Delta Program measures and training walls. Deltares Project 1209175.--->
+--->
