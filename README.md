@@ -90,7 +90,7 @@ Other files
 
 ```
 
-![A graph showing the workflow when using the Simulation Management Tool](figures\SMTv2.drawio.png "Simulation Workflow")
+![A graph showing the workflow when using the Simulation Management Tool](figures/SMTv2.drawio.png "Simulation Workflow")
 
 
 <!-- 
