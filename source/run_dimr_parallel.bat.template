@@ -1,0 +1,71 @@
+@ echo off
+title run_dflowfm_parallel_merge
+
+rem settings
+setlocal enabledelayedexpansion
+set debuglevel=-1
+set nNodes=${nNodes}
+set nProc=${nProc}
+set /A numpar = %nNodes%*%nProc%
+
+set argfile=%1
+rem set OMP_NUM_THREADS=2
+set workdir=%CD%
+
+echo number of partitions: %numpar%
+echo Working directory: %workdir%
+
+xcopy /E/H/Q/Y ..\..\grids\${NetFile} .
+
+rem set paths
+set D3D_HOME=d:\current\dimr
+set ARCH=x64
+set delwaqexedir=%D3D_HOME%\%ARCH%\dwaq\bin
+set dflowfmexedir=%D3D_HOME%\%ARCH%\dflowfm\bin
+set dimrexedir=%D3D_HOME%\%ARCH%\dimr\bin
+set dimrscriptsdir=%D3D_HOME%\%ARCH%\dimr\scripts
+set esmfexedir=%D3D_HOME%\%ARCH%\esmf\bin
+set esmfbatdir=%D3D_HOME%\%ARCH%\esmf\scripts
+set flow1dexedir=%D3D_HOME%\%ARCH%\dflow1d\bin
+set flow1d2dexedir=%D3D_HOME%\%ARCH%\dflow1d2d\bin
+set rrexedir=%D3D_HOME%\%ARCH%\drr\bin
+set rtctoolsexedir=%D3D_HOME%\%ARCH%\drtc\bin
+set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
+set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
+set sharedir=%D3D_HOME%\%ARCH%\share\bin
+set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
+set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%sharedir%
+
+
+If %numpar% GTR 1 (GOTO DOPARALLEL) ELSE (GOTO DOSINGLE)
+
+:AFTER
+echo Run completed.
+EXIT
+
+:DOPARALLEL
+echo Generating partitioned files
+echo "%dflowfmexedir%\dflowfm-cli.exe" --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
+"%dflowfmexedir%\dflowfm-cli.exe" --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
+rem make partitions
+
+<%text> 
+rem Overwrite grids with partitioned model from linux
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\grids\morf-waal-j19_6-v2a_0000_net.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\grids\morf-waal-j19_6-v2a_0001_net.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\grids\morf-waal-j19_6-v2a_0002_net.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\grids\morf-waal-j19_6-v2a_0003_net.nc .
+</%text>
+
+rem run model multi partition
+echo Run partitioned model
+echo "%dimrscriptsdir%\run_dimr_parallel.bat" %numpar% -d 0 dimr_config.xml
+"%dimrscriptsdir%\run_dimr_parallel.bat" %numpar% -d 0 dimr_config.xml
+GOTO AFTER
+
+:DOSINGLE
+rem run model single partition
+echo Run model
+echo "%dimrscriptsdir%\run_dimr.bat" -d 0 dimr_config.xml
+"%dimrscriptsdir%\run_dimr.bat" -d 0 dimr_config.xml
+GOTO AFTER

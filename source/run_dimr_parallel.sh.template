@@ -1,0 +1,122 @@
+#!/bin/bash
+
+# Set decomposition
+export nNodes=${nNodes}
+export nProc=${nProc}
+
+export nPart=$((nNodes * nProc))
+
+export MODE=${MODE}   #1 = DIMR 2023.01, 
+                      #2 = DFLOWFM, 
+                      #3 = DFLOWFM_debug, 
+                      #4 = DIMR 2.25.06.78552, 
+                      #5 = DIMR 2.25.07.78558, 
+                      #6 = 2.25.10.78597, 
+                      #7 = 2.25.15.78661, 
+                      #8 = 2024.01_rc2=2.25.15.78661 + MapInterval fix
+                      #9 = 2.26.01.78771
+                      #10 = 2.26.09.78874 (As of DIMRset 2.26.05.78843 the software does not work on the h6 cluster any more)
+                      #11 = 2.26.15.78894 (includes SedTransStt)
+                      #12 = 2.26.17.78917 (update for merging)
+
+export MAXMODE=12
+
+cp ../../grids/${NetFile} .
+
+#<%text>
+
+if [ "$MODE" = "1" ]; then
+   export dimrdir=/p/d-hydro/dimrset/2023/2023.01
+fi
+if [ "$MODE" = "4" ]; then
+   export dimrdir=/p/d-hydro/dimrset/weekly/2.25.06.78552
+   export MODE=1
+fi
+if [ "$MODE" = "5" ]; then
+   export dimrdir=/p/d-hydro/dimrset/weekly/2.25.07.78558
+   export MODE=1
+fi
+if [ "$MODE" = "6" ]; then
+   export dimrdir=/p/d-hydro/dimrset/weekly/2.25.10.78597
+   export MODE=1
+fi
+if [ "$MODE" = "7" ]; then
+   export dimrdir=/p/d-hydro/dimrset/weekly/2.25.15.78661
+   export MODE=1
+fi
+if [ "$MODE" = "8" ]; then
+   export dimrdir=/p/11209261-rivierkunde-2023-morerijn/08_executables/dimrset_2024.01_rc2 
+   export MODE=1
+fi
+if [ "$MODE" = "9" ]; then
+   export dimrdir=/p/d-hydro/dimrset/weekly/2.26.01.78771
+   export MODE=1
+fi
+if [ "$MODE" = "10" ]; then
+   export dimrdir=/p/d-hydro/dimrset/weekly/2.26.09.78874
+   export MODE=1
+fi
+if [ "$MODE" = "11" ]; then
+   export dimrdir=/p/d-hydro/dimrset/weekly/2.26.15.78894
+   export MODE=1
+fi
+if [ "$MODE" = "12" ]; then
+   export dimrdir=/p/d-hydro/dimrset/weekly/2.26.17.78917
+   export MODE=1
+fi
+if [ "$MODE" -lt "10" ]; then 
+   echo WARNING - At the end of March 2023 the h6c7 cluster will be go out of service. 
+fi
+if [ "$MODE" -gt "$MAXMODE" ]; then 
+   echo ERROR. MODE=$MODE not available, adjust smt.yml file
+   sleep 5 
+   exit 1 
+fi
+
+#export dimrdir=/p/d-hydro/dimrset/latest
+export srcdir=/p/dflowfm/users/ottevan/delft3d/delft3d
+
+export dimrFile=dimr_config.xml
+export mduFile="$(sed -n 's/\r//; s/<inputFile>\(.*\).mdu<\/inputFile>/\1/p' $dimrFile)".mdu
+
+# jobName: DIMR_$FOLDERNAME_$DIMRFILENAME
+if [ "$MODE" = "1" ]; then
+    echo running DIMR 
+    export jobName="DIMR_${PWD##*/}"
+    
+    if [ "$nPart" = "1" ]; then
+
+        $dimrdir/lnx64/bin/run_dimr.sh -m $dimrFile -d 9 &> out_submit.txt
+    else
+
+        # Read MDU file from DIMR-file
+
+        $dimrdir/lnx64/bin/run_dflowfm.sh --partition:ndomains=$nPart:icgsolver=6 $mduFile  &> out_partitioning.txt
+        $dimrdir/lnx64/bin/run_dimr.sh -c $nProc --NNODES $nNodes -m $dimrFile -d 9 &> out_submit.txt
+    fi
+else
+    if [ "$MODE" = "2" ]; then
+        echo 'running DFLOWFM release'
+        export fmdir=build_all
+        export jobName="FM_${PWD##*/}"
+    else
+        echo 'running DFLOWFM debug'
+        export fmdir=build_all_debug
+        export jobName="FMD_${PWD##*/}"
+    fi
+    export LD_LIBRARY_PATH=$srcdir/$fmdir/install/lib:$LD_LIBRARY_PATH
+    if [ "$nPart" = "1" ]; then
+        $srcdir/$fmdir/install/bin/dflowfm --autostartstop $mduFile &> out_submit.txt
+    else
+        # On Deltares systems only:
+        if [ -f "/opt/apps/deltares/.nl" ]; then
+            # If not defined yet: Define I_MPI_FABRICS and FI_PROVIDER with proper values for Deltares systems
+            [ ! -z "$I_MPI_FABRICS" ] && echo "I_MPI_FABRICS is already defined" || export I_MPI_FABRICS=shm
+            [ ! -z "$FI_PROVIDER" ] && echo "FI_PROVIDER is already defined" || export FI_PROVIDER=tcp
+        fi
+        
+        $srcdir/$fmdir/install/bin/dflowfm --partition:ndomains=$nPart:icgsolver=6 $mduFile  &> out_partitioning.txt
+        mpiexec -np $nPart $srcdir/$fmdir/install/bin/dflowfm --autostartstop $mduFile &> out_submit.txt
+    fi 
+fi
+</%text>

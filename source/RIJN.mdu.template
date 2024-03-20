@@ -1,0 +1,303 @@
+
+<%text>#######################################################################################################</%text>
+#                                       RIJNTAKKEN model                                              #
+#                           D-HYDRO model: dflowfm2d-hydr-waal-j19_6-v2a                              #
+#                                                                                                     # 
+#        Eigendom: Rijkswaterstaat-ON, Functioneel Beheer: RWS-WVL, Applicatie Beheer: Deltares       #
+#*****************************************************************************************************#
+#   Modeltype: D-Flow FM 2D + D-RTC                                                                   #
+#             (bijv.: D-Flow FM 2D; D-Flow FM 2D + D-RTC; D-Flow FM 3D; D-Flow FM 3D + D-WAQ)         #
+#   Bestandstype: Basis MDU-bestand zesde generatiemodellen RWS                                       #
+#   Editable/Uneditable: Modeleigenschappen welke WEL/NIET mogen worden aangepast bij                 # 
+#   toepassen van model                                                                               # 
+#   Invoer voor: stationaire van 1020 m3/s bij Lobith                                                 #
+#                                                                                                     #
+#   Ontwikkelaar: Deltares, Anna Kosters                                                              #
+#   Datum: 31-08-2022                                                                                 #
+#                                                                                                     #
+#   Opmerkingen:                                                                                      #
+#   1. DIMR-versie                                                                                    #
+#   2. Toe te passen in combinatie met D-RTC                                                          #
+#   3. Nadere info is opgenomen in een Factsheet op IPLO (zie onder)                                  #
+#   4. .......                                                                                        #
+#                                                                                                     #
+#   Modelbeschrijving / doel van de berekening                                                        #
+#   1. Modelbouw deelmodellen beno19_6, takmodel waal                                                 #
+#   2. .......                                                                                        #
+#   3. <Organisatie, naam>                                                                            #
+#   4. Datum: <>                                                                                      #
+#                                                                                                     #
+# Onregelmatigheden of problemen met deze modelschematisatie kunnen gemeld worden via het meldings-   #
+# formulier bij het Informatiepunt Leefomgeving (voorheen Helpdesk Water) onder Modelschematisaties:  #
+#   https://iplo.nl/thema/water/applicaties-modellen/modelschematisaties/                             #
+#                                                                                                     #
+<%text>#######################################################################################################</%text>
+#======================================================================================================
+[General]
+#======================================================================================================
+# Uneditable
+#------------------------------------------------------------------------------------------------------
+Program                             = D-Flow FM
+FileVersion                         = 1.09                                                                # File format version (do not edit this)
+PathsRelativeToParent               = 1                                                                   # Default: 0. Whether or not (1/0) to resolve file names (e.g. inside the *.ext file) relative to their direct parent, instead of to the toplevel MDU working dir.                  
+AutoStart                           = 0                                                                   # Autostart simulation after loading MDU (0: no, 1: autostart, 2: autostartstop)
+
+<%text>#######################################################################################################</%text>
+#======================================================================================================
+[geometry] 
+#======================================================================================================
+# Editable
+#------------------------------------------------------------------------------------------------------
+NetFile                             = ${NetFile}                                                          # Unstructured grid file *_net.nc, including bed level
+GridEnclosureFile                   = ${GridEnclosureFile}                         # Enclosure polygon file *_enc.pol (third column 1/-1: inside/outside)
+DryPointsFile                       = ${DryPointsFile}                        # Dry areas polygon file *_dry.pol (third column 1/-1: inside/outside)
+ThinDamFile                         = ${ThinDamFile}                        # Polyline file *_thd.pli, containing thin dams
+FixedWeirFile                       = ${FixedWeirFile}                       # Polyline file *_fxw.pliz, containing fixed weirs with columns x, y, crest level, left ground level, right ground level
+PillarFile                          = ${PillarFile}                   # Polyline file *_pillar.pliz, containing bridge pillers with four colums with x, y, diameter and Cd coefficient
+IniFieldFile                        = ${IniFieldFile}     # File *.ini containg initial water level and velocity fields
+StructureFile                       = ${StructureFile}             # File *.ini containing list of structures and their inititial state (pumps, weirs, gates and general structures)
+UseCaching                          = 1                                                                  # Use caching of flow model geometry input (1: yes, 0: no)
+#------------------------------------------------------------------------------------------------------
+# Uneditable
+#------------------------------------------------------------------------------------------------------
+WaterLevIni                         = -999.                                                               # Initial water level at missing water depth points (cell centres) [m+dat]
+BedlevUni                           = 999.                                                                # Uniform bed level used at missing values at grid corners [m+dat]
+AngLat                              = 52.                                                                 # Angle of latitude S-N [deg], 0: no Coriolis [deg]
+AngLon                              = 5.                                                                  # Angle of longitude E-W [deg], 0: Greenwich, used in solar heat flux computation.
+BedlevType                          = ${BedlevType}                                                                   # Bathymetry specification [-] (3: at nodes, face levels mean of node values)
+Conveyance2D                        = -1                                                                  # Conveyance specficiation [-] (-1: uniform bed level at velocity points: average of two surrounding net nodes)
+Sillheightmin                       = 0.                                                                  # Weir treatment only if both sills larger than this value [m]
+OpenBoundaryTolerance               = 3                                                                   # Search tolerance factor between boundary polyline and grid cells [cell size]
+
+#======================================================================================================
+[trachytopes]
+#======================================================================================================
+# Editable
+#------------------------------------------------------------------------------------------------------
+TrtL                                = ${TrtL}                # File (*.arl) including distribution of trachytope definitions
+#------------------------------------------------------------------------------------------------------
+# Uneditable
+#------------------------------------------------------------------------------------------------------
+TrtRou                              = ${TrtRou}                                                                  # Include alluvial and vegetation roughness (trachytopes) (Y: yes, N: no)
+TrtDef                              = ${TrtDef}               # File (*.ttd) including trachytope definitions
+DtTrt                               = ${TrtDtModel}                                                       # Trachytope roughness update time interval [s]
+TrtMxR                              = 100                                                                 # Maximum recursion level for combined trachytope definitions
+#======================================================================================================
+[calibration]
+#======================================================================================================
+# Editable
+#------------------------------------------------------------------------------------------------------
+AreaFile                            = ${AreaFile}                # File (*.cll) including area distribution of calibration definitions 
+#------------------------------------------------------------------------------------------------------
+# Uneditable
+#------------------------------------------------------------------------------------------------------
+UseCalibration                      = ${UseCalibration}                                                                  # Activate calibration factor friction multiplier (1 = yes, 0 = no)
+DefinitionFile                      = ${DefinitionFile}               # File (*.cld) including calibration definitions
+
+<%text>#######################################################################################################</%text>
+#======================================================================================================
+[physics]
+#======================================================================================================
+# Uneditable
+#------------------------------------------------------------------------------------------------------
+UnifFrictType                       = 1                                                                   # Uniform friction type [-] (0: Chezy, 1: Manning, 2: White-Colebrook)
+UnifFrictCoef                       = 0.023                                                               # Uniform friction coefficient [-] (0: no friction)
+Vicouv                              = 0.1                                                                 # Uniform horizontal eddy viscosity [m2/s]
+Dicouv                              = 0.1                                                                 # Uniform horizontal eddy diffusivity [m2/s]
+Smagorinsky                         = 0.20                                                                # Smagorinsky factor in horizontal turbulence [-]
+Elder                               = 0.                                                                  # Elder factor in horizontal turbulence [-]
+Irov                                = 0                                                                   # Wall roughness type [-] (0: free-slip, 1: partial-slip using wall_ks, 2: no-slip)
+Rhomean                             = 1000                                                                # Average water density [kg/m3]
+Ag                                  = 9.813                                                               # Gravitational acceleration [m2/s]
+VillemonteCD1                       = 1.                                                                  # Calibration coefficient for Villemonte [-] (default = 1.0)  
+VillemonteCD2                       = 10.                                                                 # Calibration coefficient for Villemonte [-] (default = 10.0) 
+Salinity                            = 0                                                                   # Include salinity [-], (0=no, 1=yes)
+Temperature                         = 0                                                                   # Include temperature [-] (0: no, 1: only transport, 3: excess model of D3D, 5: composite (ocean) model)
+SecondaryFlow                       = ${SecondaryFlow}                                                    # Secondary flow [-] (0: no, 1: yes)
+
+#======================================================================================================
+[wind]
+#======================================================================================================
+# No wind                                                         
+
+#======================================================================================================
+[waves]
+#======================================================================================================
+# No waves
+
+<%text>#######################################################################################################</%text>
+#======================================================================================================
+[numerics]
+#======================================================================================================
+# Uneditable
+#------------------------------------------------------------------------------------------------------
+CFLMax                              = 0.7                                                                 # Maximum Courant number [-]
+AdvecType                           = 33                                                                  # Advection type [-] (33: Perot q(uio-u) fast)
+TimeStepType                        = 2                                                                   # Time step handling [-] (2: full implicit step-reduce)
+Icgsolver                           = 4                                                                   # Solver type [-] (4: sobekGS + Saadilud, 6: parallel/Petsc)
+FixedWeirScheme                     = 9                                                                   # Fixed weir scheme [-] (0: None, 6: Numerical, 8: Tabellenboek, 9: Villemonte)
+Tlfsmo                              = 0                                                                   # Fourier smoothing time on water level boundaries [s]
+Teta0                               = 0.55                                                                # Theta of time integration [-] (0.5 < theta < 1) 
+Epshu                               = ${Epshu}                                                            # Threshold water depth for wet and dry cells [m]
+MinTimestepBreak                    = ${MinTimestepBreak}                                                 # smallest allowed timestep (in s), checked on a sliding average of several timesteps. Run will abort when violated.
+
+<%text>#######################################################################################################</%text>
+#======================================================================================================
+[time]
+#======================================================================================================
+# Editable
+#------------------------------------------------------------------------------------------------------
+RefDate                             = ${ReferenceDate}                                                            # Reference date [YYYY-MM-DD HH:MM:SS]
+TStart                              = ${TStart}           # Start time w.r.t. RefDate (in TUnit)
+TStop                               = ${TStop}            # Stop  time w.r.t. RefDate (in TUnit)
+#------------------------------------------------------------------------------------------------------
+# Uneditable
+#------------------------------------------------------------------------------------------------------
+Tzone                               = 1                                                                   # Time zone assigned to input time series
+DtUser                              = ${DtUserModel}           # Time interval (s) for external forcing update
+DtMax                               = ${DtMax}            # Maximal computation timestep (s)
+DtInit                              = ${DtInit}           # Initial computation timestep (s)
+Dtfacmax                            = ${Dtfacmax}         # Max timestep increase factor ( ) 
+Tunit                               = ${TUnit}            # Time unit for start/stop times (D, H, M or S)
+
+#======================================================================================================
+[restart]
+#======================================================================================================
+# Editable
+#------------------------------------------------------------------------------------------------------
+RestartFile                         = ${RestartFile}      # Restart netcdf-file, either *_rst.nc or *_map.nc
+RestartDateTime                     =                     # Restart date and time (yyyymmddhhmmss) when restarting from *_map.nc 
+RstIgnoreBl                         = ${RstIgnoreBl}      # Flag indicating whether bed level from restart should be ignored (0=no (default), 1=yes)
+
+#======================================================================================================
+[external forcing]
+#======================================================================================================
+# Editable
+#------------------------------------------------------------------------------------------------------
+ExtForceFile                        =                                                                     # Old format for external forcings file *.ext, link with tim/cmp-format boundary conditions specification
+ExtForceFileNew                     = ${ExtForceFileNew}       # format for external forcings file *.ext, link with bc-format boundary conditions specification
+
+<%text>#######################################################################################################</%text>
+#======================================================================================================
+[output]
+#======================================================================================================
+# Editable
+#------------------------------------------------------------------------------------------------------
+OutputDir                           = results                                                             # Output directory of map-, his-, rst-, dat- and timings-files, default: DFM_OUTPUT_<modelname>. Set to . for current dir.
+ObsFile                             = ${ObsFile}  # Points file *_obs.xyn with observation stations with rows x, y, station name: *measurement_obs.pli is OBLIGATORY
+CrsFile                             = ${CrsFile}    # Polyline file *_crs.pli defining observation cross sections: *calibration_crs.pli is OBLIGATORY
+FouFile                             = ${FouFile}                                         # Fourier analysis input file *.fou
+FouUpdateStep                       = 2                                                                   # Fourier update step type: 0=every user time step, 1=every computational timestep.
+HisFile                             =                                                                     # HisFile name *_his.nc
+HisInterval                         = ${HisInterval}                                                      # History output times, given as "interval" "start period" "end period" [s]
+MapFile                             =                                                                     # MapFile name *_map.nc
+MapInterval                         = ${MapInterval}                                                      # Map times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period
+XLSInterval                         = 0.                                                                  # Interval (s) between XLS history
+RstInterval                         = ${RstInterval}                                                      # Restart times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period [s]
+ClassMapFile                        =                                                                     # ClassMapFile name *_clm.nc
+ClassMapInterval                    =                                                                     # Class map output times, given as "interval" "start period" "end period" [s]
+WaterlevelClasses                   =                                                                     # Class map's list of class values for water levels
+WaterDepthClasses                   =                                                                     # Class map's list of class values for water depths
+StatsInterval                       = -60.                                                                # Screen step output interval in seconds simulation time, if negative in seconds wall clock time
+TimingsInterval                     =                                                                     # Timings statistics output interval
+#------------------------------------------------------------------------------------------------------
+# Write time series to his-file (1: yes, 0: no)
+#------------------------------------------------------------------------------------------------------
+Wrihis_balance                      = 1                                                                   # mass balance totals 
+Wrihis_sourcesink                   = 1                                                                   # sources-sinks statistics 
+Wrihis_structure_gen                = 1                                                                   # general structure parameters 
+Wrihis_structure_dam                = 0                                                                   # dam parameters 
+Wrihis_structure_pump               = 1                                                                   # pump parameters 
+Wrihis_structure_gate               = 1                                                                   # gate parameters 
+Wrihis_structure_weir               = 0                                                                   # weir parameters 
+Wrihis_structure_orifice            = 0                                                                   # orifice parameters 
+Wrihis_structure_bridge             = 1                                                                   # bridge parameters 
+Wrihis_structure_culvert            = 0                                                                   # culvert parameters 
+Wrihis_structure_damBreak           = 0                                                                   # dam break parameters 
+Wrihis_structure_uniWeir            = 1                                                                   # universal weir parameters 
+Wrihis_structure_compound           = 0                                                                   # compound structure parameters 
+Wrihis_turbulence                   = 1                                                                   # k, eps and vicww 
+Wrihis_wind                         = 0                                                                   # wind velocities 
+Wrihis_rain                         = 0                                                                   # precipitation 
+Wrihis_temperature                  = 0                                                                   # temperature 
+Wrihis_waves                        = 0                                                                   # wave data 
+Wrihis_heat_fluxes                  = 0                                                                   # heat fluxes 
+Wrihis_salinity                     = 0                                                                   # salinity 
+Wrihis_density                      = 0                                                                   # density 
+Wrihis_waterlevel_s1                = 1                                                                   # water level 
+Wrihis_bedlevel                     = 0                                                                   # bed level 
+Wrihis_waterdepth                   = 1                                                                   # waterdepth 
+Wrihis_velocity_vector              = 1                                                                   # velocity vectors 
+Wrihis_upward_velocity_component    = 0                                                                   # upward velocity 
+Wrihis_sediment                     = 0                                                                   # sediment transport 
+Wrihis_constituents                 = 0                                                                   # tracers 
+Wrihis_zcor                         = 0                                                                   # vertical coordinates
+#------------------------------------------------------------------------------------------------------
+# Write spatial output to map-file (1: yes, 0: no)
+#------------------------------------------------------------------------------------------------------
+Wrimap_waterlevel_s0                = 0                                                                   # water levels of previous time step 
+Wrimap_waterlevel_s1                = 1                                                                   # water levels 
+Wrimap_volume1                      = 0                                                                   # volumes 
+Wrimap_waterdepth_hu                = 0                                                                   # water depths on u-points 
+Wrimap_ancillary_variables          = 0                                                                   # ancillary_variables attributes 
+Wrimap_flowarea_au                  = 0                                                                   # flow areas au 
+Wrimap_velocity_component_u0        = 0                                                                   # velocity component of previous time step 
+Wrimap_velocity_component_u1        = 1                                                                   # velocity component 
+Wrimap_velocity_vector              = 1                                                                   # cell-center velocity vectors 
+Wrimap_velocity_magnitude           = 1                                                                   # cell-center velocity vector magnitude 
+Wrimap_velocity_vectorq             = 0                                                                   # cell-center velocity vectors (discharge-based) 
+Wrimap_upward_velocity_component    = 0                                                                   # upward velocity component on cell interfaces 
+Wrimap_density_rho                  = 0                                                                   # flow density 
+Wrimap_horizontal_viscosity_viu     = 1                                                                   # horizontal viscosity 
+Wrimap_horizontal_diffusivity_diu   = 1                                                                   # horizontal diffusivity 
+Wrimap_flow_flux_q1                 = 1                                                                   # flow flux 
+Wrimap_flow_flux_q1_main            = 0                                                                   # flow flux in main channel 
+Wrimap_numlimdt                     = 1                                                                   # the number times a cell was Courant limiting 
+Wrimap_taucurrent                   = 1                                                                   # the shear stress 
+Wrimap_chezy                        = 1                                                                   # the Chezy roughness 
+Wrimap_turbulence                   = 0                                                                   # vicww, k and eps 
+Wrimap_trachytopes                  = 1                                                                   # trachytope roughnesses 
+Wrimap_calibration                  = 1                                                                   # roughness calibration factors 
+Wrimap_DTcell                       = 1                                                                   # time step per cell based on CFL 
+#------------------------------------------------------------------------------------------------------
+# Write grid-snapped features to shape file (1: yes, 0: no)
+#------------------------------------------------------------------------------------------------------
+Wrishp_crs                          = 0                                                                   # cross sections 
+Wrishp_obs                          = 0                                                                   # observation stations 
+Wrishp_weir                         = 0                                                                   # weirs 
+Wrishp_thd                          = 0                                                                   # thin dams 
+Wrishp_gate                         = 0                                                                   # gates 
+Wrishp_fxw                          = 0                                                                   # fixed weirs 
+Wrishp_src                          = 0                                                                   # source-sinks 
+Wrishp_pump                         = 0                                                                   # pumps 
+Wrishp_dryarea                      = 0                                                                   # dry areas 
+Wrishp_genstruc                     = 0                                                                   # general structures 
+#------------------------------------------------------------------------------------------------------
+Writepart_domain                    = 0                                                                   # Write partition domain info. for postprocessing
+WriteDFMinterpretedvalues           = 0                                                                   # Write DFMinterpretedvalues (1: yes, 0: no)
+MapOutputTimeVector                 =                                                                     # File (*.mpt) containing fixed map output times (s) w.r.t. RefDate
+FullGridOutput                      = 0                                                                   # Full grid output mode (0: compact, 1: full time-varying grid data)
+EulerVelocities                     = 0                                                                   # Euler velocities output (0: GLM, 1: Euler velocities)
+Wrirst_bnd                          = 1                                                                   # Write waterlevel, bedlevel and coordinates of boundaries to restart files
+#------------------------------------------------------------------------------------------------------
+# Uneditable
+#------------------------------------------------------------------------------------------------------
+MapFormat                           = 4                                                                   # Map file format, 1: netCDF, 2: Tecplot, 3: netCFD and Tecplot, 4: NetCDF-UGRID
+NcFormat                            = 3                                                                   # Format for all NetCDF output files (3: classic, 4: NetCDF4+HDF5)
+NcWriteLatLon                       = 0                                                                   # Write extra lat-lon coordinates for all projected coordinate variables in each NetCDF file (for CF-compliancy).
+#======================================================================================================
+[sediment]
+#======================================================================================================
+# Editable
+#------------------------------------------------------------------------------------------------------
+Sedimentmodelnr                           = ${Sedimentmodelnr}                   # Sediment model nr, (0=no, 1=Krone, 2=SvR2007, 3=E-H, 4=MorphologyModule)
+SedFile                                   = ${SedFile}          # Sediment characteristics file (*.sed)
+MorFile                                   = ${MorFile}          # Morphology settings file (*.mor)
+DredgeFile                                = ${DredgeFile}          # Dredging/dumping settings file (*.dad)
+MorCFL                                    = ${MorCFL}                   # Use CFL-like condition for morphologic updating (0=no, 1=yes) (default yes)
+DzbDtMax                                  = ${DzbDtMax}                 # Maximum bed level change (m) per time step for the case MorCFL=1 (default=0.1 m)
+#------------------------------------------------------------------------------------------------------
+# Uneditable
+#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------
+<%text>#######################################################################################################</%text>
