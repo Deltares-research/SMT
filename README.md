@@ -90,6 +90,8 @@ Other files
 
 ```
 
+The figure below shows the workflow of the Simulation Management Tool. 
+
 ![A graph showing the workflow when using the Simulation Management Tool](figures/SMTv2.drawio.png "Simulation Workflow")
 
 
