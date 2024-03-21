@@ -77,7 +77,8 @@ Other files
 
 ```
 - smt.yml                     - configuration file for the SMT
-- source\                     - source folder containing model input
+- static\                     - folder containing model input which is the same for all levels 
+- dynamic\                    - folder containing model input which changed per level
 +-- mdu_filename.mdu.template - mako template file for model input
 - boundary_conditions\        - 
 +-- bnd_filename.bc.template  - example template file for boundary conditions  

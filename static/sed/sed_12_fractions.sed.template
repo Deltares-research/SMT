@@ -1,0 +1,128 @@
+[SedimentFileInformation]
+    FileCreatedBy   = Willem Ottevanger
+    FileVersion     = 02.00
+    FileCreationDate= 28-06-2023
+[SedimentOverall]
+    IopSus          = 1               #           Suspended sediment size is Y/N calculated dependent on d50
+    Cref            = 1.60e+03        # [kg/m3]   CSoil Reference density for hindered settling
+
+[Sediment]
+    Name            = #Fraction01# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0000080           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.0000630        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportSand}
+[Sediment]
+    Name            = #Fraction02# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0000630           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.0001250        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportSand}
+[Sediment]
+    Name            = #Fraction03# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0001250           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.0002500        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportSand}
+[Sediment]
+    Name            = #Fraction04# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0002500           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.0005000        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportSand}
+[Sediment]
+    Name            = #Fraction05# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0005000           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.0010000        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportSand}
+[Sediment]
+    Name            = #Fraction06# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0010000           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.0020000        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportSand}
+[Sediment]
+    Name            = #Fraction07# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0020000           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.0040000        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportGravel}
+[Sediment]
+    Name            = #Fraction08# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0040000           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.0080000        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportGravel}
+[Sediment]
+    Name            = #Fraction09# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0080000           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.0160000        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportGravel}
+[Sediment]
+    Name            = #Fraction10# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0160000           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.0315000        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportGravel}
+[Sediment]
+    Name            = #Fraction11# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0315000           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.0630000        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportGravel}
+[Sediment]
+    Name            = #Fraction12# #        Name as specified in NamC in mdf-file
+    SedTyp          = bedload          #        Must be "sand", "mud" or "bedload"
+    SedMinDia       = 0.0630000           # [  m   ] Sand only: Minimum sediment diameter
+    SedMaxDia       = 0.1250000        # [  m   ] Sand only: Maximum sediment diameter
+    RhoSol          = 2.65e+003       # [kg/m3]     Specific density
+    CDryB           = 1.6e+003        # [kg/m3]     Dry bed density
+    FacDSS          = 1.0e+2          # [-]         FacDss*SedDia = Initial suspended sediment diameter.
+    IniSedThick     = 999             # Initial sediment layer thickness at bed (uniform value or filename)
+${SedimentTransportGravel}
