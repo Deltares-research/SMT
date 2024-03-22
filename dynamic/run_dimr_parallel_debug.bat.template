@@ -16,6 +16,9 @@ echo number of partitions: %numpar%
 echo Working directory: %workdir%
 
 xcopy /E/H/Q/Y ..\..\grids\${NetFile} .
+mkdir ..\..\static\caching
+xcopy /E/H/Q/Y ..\..\static\caching\*.cache .
+
 rem set paths
 rem set D3D_HOME=d:\checkouts\oss_trunk\build_all\x64\Debug\dflowfm-cli.exe 
 set bindir=d:\checkouts\oss_trunk\install_all\bin
@@ -25,13 +28,16 @@ set PATH=%bindir%;%libdir%;%PATH%
 If %numpar% GTR 1 (GOTO DOPARALLEL) ELSE (GOTO DOSINGLE)
 
 :AFTER
+echo Copying cache files
+xcopy /E/H/Q/Y *.cache ..\..\static\caching\
+
 echo Run completed.
 EXIT
 
 :DOPARALLEL
 echo Generating partitioned files
-echo "dflowfm-cli.exe" --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
-"dflowfm-cli.exe" --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
+echo dflowfm-cli.exe --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
+dflowfm-cli.exe --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
 rem make partitions
 
 <%text> 

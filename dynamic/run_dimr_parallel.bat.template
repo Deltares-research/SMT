@@ -16,6 +16,8 @@ echo number of partitions: %numpar%
 echo Working directory: %workdir%
 
 xcopy /E/H/Q/Y ..\..\static\grids\${NetFile} .
+mkdir ..\..\static\caching
+xcopy /E/H/Q/Y ..\..\static\caching\*.cache .
 
 rem set paths
 set D3D_HOME=d:\current\dimr
@@ -27,6 +29,9 @@ set PATH=%bindir%;%libdir%
 If %numpar% GTR 1 (GOTO DOPARALLEL) ELSE (GOTO DOSINGLE)
 
 :AFTER
+echo Copying cache files
+xcopy /E/H/Q/Y *.cache ..\..\static\caching\
+
 echo Run completed.
 EXIT
 

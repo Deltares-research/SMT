@@ -22,6 +22,8 @@ export MODE=${MODE}   #1 = DIMR 2023.01,
 export MAXMODE=12
 
 cp ../../static/grids/${NetFile} .
+mkdir ../../static/caching
+cp ../../static/caching/*.cache .
 
 #<%text>
 
@@ -120,3 +122,4 @@ else
     fi 
 fi
 </%text>
+cp *.cache ../../static/caching/
