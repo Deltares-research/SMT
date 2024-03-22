@@ -46,8 +46,8 @@ rem Overwrite grids with partitioned model from linux
 
 rem run model multi partition
 echo Run partitioned model
-echo "%dimrscriptsdir%\run_dimr_parallel.bat" %numpar% -d 0 dimr_config.xml
-"%dimrscriptsdir%\run_dimr_parallel.bat" %numpar% -d 0 dimr_config.xml
+echo mpiexec -n %numpar% dimr.exe -d 0 dimr_config.xml
+mpiexec -n %numpar% dimr.exe -d 0 dimr_config.xml > dimr.log
 GOTO AFTER
 
 :DOSINGLE
