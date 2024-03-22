@@ -76,7 +76,7 @@ def runner(settings, clean, backup):
         # apply input 
         if os.path.exists(os.path.join('output','work')):
             shutil.rmtree(os.path.join('output','work'))
-        shutil.copytree('source',os.path.join('output','work'))
+        shutil.copytree('dynamic',os.path.join('output','work'))
         model.adapt(model_settings, smt_settings)
         tools.remove(os.path.join('output','work','**','**.template'))
    

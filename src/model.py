@@ -351,7 +351,7 @@ def adapt(model_settings, smt_settings):
     for item in glob.glob('**', recursive=True):
         if os.path.isfile(item): 
             head, tail = os.path.split(item)
-            if (tail.find('.template') > 0) and not (head.find('source') > -1): 
+            if (tail.find('.template') > 0) and not (head.find('dynamic') > -1): 
                 filename = tail.replace('.template','')
                 file_head, file_ext = os.path.splitext(filename)
                 if file_ext not in smt_settings['application']['input']: 
