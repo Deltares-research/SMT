@@ -15,9 +15,9 @@ set workdir=%CD%
 echo number of partitions: %numpar%
 echo Working directory: %workdir%
 
-xcopy /E/H/Q/Y ..\..\grids\${NetFile} .
+%%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\${NetFile} .
 mkdir ..\..\static\caching
-xcopy /E/H/Q/Y ..\..\static\caching\*.cache .
+%%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\caching\*.cache .
 
 rem set paths
 rem set D3D_HOME=d:\checkouts\oss_trunk\build_all\x64\Debug\dflowfm-cli.exe 
@@ -29,7 +29,7 @@ If %numpar% GTR 1 (GOTO DOPARALLEL) ELSE (GOTO DOSINGLE)
 
 :AFTER
 echo Copying cache files
-xcopy /E/H/Q/Y *.cache ..\..\static\caching\
+%%systemroot%\System32\xcopy /E/H/Q/Y *.cache ..\..\static\caching\
 
 echo Run completed.
 EXIT
@@ -40,13 +40,11 @@ echo dflowfm-cli.exe --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
 dflowfm-cli.exe --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
 rem make partitions
 
-<%text> 
 rem Overwrite grids with partitioned model from linux
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0000_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0001_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0002_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0003_net.nc .
-</%text>
+%%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0000_net.nc .
+%%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0001_net.nc .
+%%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0002_net.nc .
+%%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0003_net.nc .
 
 rem run model multi partition
 echo Run partitioned model
