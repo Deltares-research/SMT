@@ -37,7 +37,7 @@
   <component name="FlowFM">
     <library>dflowfm</library>
     <workingDir>.</workingDir>
-    <inputFile>dflowfm.mdu</inputFile>
+    <inputFile>${MDUName}.mdu</inputFile>
     <mpiCommunicator>DFM_COMM_DFMWORLD</mpiCommunicator>
     <process>${ProcessesString}</process>
   </component>

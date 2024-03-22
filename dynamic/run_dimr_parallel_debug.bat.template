@@ -20,7 +20,7 @@ rem set paths
 rem set D3D_HOME=d:\checkouts\oss_trunk\build_all\x64\Debug\dflowfm-cli.exe 
 set bindir=d:\checkouts\oss_trunk\install_all\bin\
 set libdir=d:\checkouts\oss_trunk\install_all\lib\
-set PATH=%bindir%;%libdir%
+set PATH=%bindir%;%libdir%;%PATH%
 
 If %numpar% GTR 1 (GOTO DOPARALLEL) ELSE (GOTO DOSINGLE)
 

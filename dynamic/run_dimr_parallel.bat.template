@@ -20,22 +20,9 @@ xcopy /E/H/Q/Y ..\..\static\grids\${NetFile} .
 rem set paths
 set D3D_HOME=d:\current\dimr
 set ARCH=x64
-set delwaqexedir=%D3D_HOME%\%ARCH%\dwaq\bin
-set dflowfmexedir=%D3D_HOME%\%ARCH%\dflowfm\bin
-set dimrexedir=%D3D_HOME%\%ARCH%\dimr\bin
-set dimrscriptsdir=%D3D_HOME%\%ARCH%\dimr\scripts
-set esmfexedir=%D3D_HOME%\%ARCH%\esmf\bin
-set esmfbatdir=%D3D_HOME%\%ARCH%\esmf\scripts
-set flow1dexedir=%D3D_HOME%\%ARCH%\dflow1d\bin
-set flow1d2dexedir=%D3D_HOME%\%ARCH%\dflow1d2d\bin
-set rrexedir=%D3D_HOME%\%ARCH%\drr\bin
-set rtctoolsexedir=%D3D_HOME%\%ARCH%\drtc\bin
-set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
-set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
-set sharedir=%D3D_HOME%\%ARCH%\share\bin
-set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
-set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%sharedir%
-
+set bindir=d:\checkouts\oss_trunk\install_all\bin
+set libdir=d:\checkouts\oss_trunk\install_all\lib
+set PATH=%bindir%;%libdir% 
 
 If %numpar% GTR 1 (GOTO DOPARALLEL) ELSE (GOTO DOSINGLE)
 
@@ -45,16 +32,16 @@ EXIT
 
 :DOPARALLEL
 echo Generating partitioned files
-echo "%dflowfmexedir%\dflowfm-cli.exe" --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
-"%dflowfmexedir%\dflowfm-cli.exe" --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
+echo dflowfm-cli.exe --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
+dflowfm-cli.exe --partition:ndomains=%numpar%:icgsolver=7 %argfile%.mdu
 rem make partitions
 
 <%text> 
 rem Overwrite grids with partitioned model from linux
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0000_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0001_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0002_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0003_net.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0000_net.nc.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0001_net.nc.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0002_net.nc.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0003_net.nc.nc .
 </%text>
 
 rem run model multi partition

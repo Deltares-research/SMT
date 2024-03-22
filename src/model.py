@@ -343,6 +343,8 @@ def get_input(smt_settings):
                     model_settings['DIMR_dflowfm_workdir'] = smt_settings['model']['DIMR_dflowfm_workdir']
                 if 'DIMR_rtc_workdir' in smt_settings['model']:
                     model_settings['DIMR_rtc_workdir'] = smt_settings['model']['DIMR_rtc_workdir']
+                if 'input' in smt_settings['model']:  
+                    model_settings['MDUName'] = smt_settings['model']['input']
             yield model_settings
 
         # increase counter 
