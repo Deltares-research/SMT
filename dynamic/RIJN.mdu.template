@@ -140,6 +140,7 @@ Tlfsmo                              = 0                                         
 Teta0                               = 0.55                                                                # Theta of time integration [-] (0.5 < theta < 1) 
 Epshu                               = ${Epshu}                                                            # Threshold water depth for wet and dry cells [m]
 MinTimestepBreak                    = ${MinTimestepBreak}                                                 # smallest allowed timestep (in s), checked on a sliding average of several timesteps. Run will abort when violated.
+cstbnd                              = ${cstbnd}                                                           # Delft-3D type velocity treatment near boundaries for small coastal models (1: yes, 0: no) 
 
 <%text>#######################################################################################################</%text>
 #======================================================================================================
