@@ -18,8 +18,8 @@ echo Working directory: %workdir%
 xcopy /E/H/Q/Y ..\..\grids\${NetFile} .
 rem set paths
 rem set D3D_HOME=d:\checkouts\oss_trunk\build_all\x64\Debug\dflowfm-cli.exe 
-set bindir=d:\checkouts\oss_trunk\install_all\bin\
-set libdir=d:\checkouts\oss_trunk\install_all\lib\
+set bindir=d:\checkouts\oss_trunk\install_all\bin
+set libdir=d:\checkouts\oss_trunk\install_all\lib
 set PATH=%bindir%;%libdir%;%PATH%
 
 If %numpar% GTR 1 (GOTO DOPARALLEL) ELSE (GOTO DOSINGLE)
@@ -36,10 +36,10 @@ rem make partitions
 
 <%text> 
 rem Overwrite grids with partitioned model from linux
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0000_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0001_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0002_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0003_net.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0000_net.nc.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0001_net.nc.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0002_net.nc.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j99_6-v1a_0003_net.nc.nc .
 </%text>
 
 rem run model multi partition
