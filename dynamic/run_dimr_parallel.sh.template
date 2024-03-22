@@ -21,7 +21,7 @@ export MODE=${MODE}   #1 = DIMR 2023.01,
 
 export MAXMODE=12
 
-cp ../../grids/${NetFile} .
+cp ../../static/grids/${NetFile} .
 
 #<%text>
 

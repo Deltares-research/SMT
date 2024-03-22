@@ -15,7 +15,7 @@ set workdir=%CD%
 echo number of partitions: %numpar%
 echo Working directory: %workdir%
 
-xcopy /E/H/Q/Y ..\..\grids\${NetFile} .
+xcopy /E/H/Q/Y ..\..\static\grids\${NetFile} .
 
 rem set paths
 set D3D_HOME=d:\current\dimr
@@ -51,10 +51,10 @@ rem make partitions
 
 <%text> 
 rem Overwrite grids with partitioned model from linux
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\grids\morf-waal-j19_6-v2a_0000_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\grids\morf-waal-j19_6-v2a_0001_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\grids\morf-waal-j19_6-v2a_0002_net.nc .
-%systemroot%\System32\xcopy /E/H/Q/Y ..\..\grids\morf-waal-j19_6-v2a_0003_net.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0000_net.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0001_net.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0002_net.nc .
+%systemroot%\System32\xcopy /E/H/Q/Y ..\..\static\grids\morf-waal-j19_6-v2a_0003_net.nc .
 </%text>
 
 rem run model multi partition
