@@ -53,6 +53,6 @@ GOTO AFTER
 :DOSINGLE
 rem run model single partition
 echo Run model
-echo "%dimrscriptsdir%\run_dimr.bat" -d 0 dimr_config.xml
-"%dimrscriptsdir%\run_dimr.bat" -d 0 dimr_config.xml
+echo dimr.exe -d 0 dimr_config.xml
+dimr.exe -d 0 dimr_config.xml
 GOTO AFTER
