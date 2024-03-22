@@ -280,6 +280,10 @@ def get_input(smt_settings):
                     model_settings['Dtfacmax'] = 1.1     
                 if 'Tlfsmo' not in model_settings.keys():
                     model_settings['Tlfsmo'] = 0.0       
+                if 'morphopol' not in model_settings.keys():
+                    model_settings['morphopol'] = '' 
+                if 'InMorphoPol' not in model_settings.keys():
+                    model_settings['InMorphoPol'] = '1' 
                 # At this point we have read the desired SpinupTime and TimeDuration of the morphodynamic activity. 
                 # Now we have to find a DtUserModel which is close to the desired DtUser and allows for the setting of different DtUser related outputs
                 #
