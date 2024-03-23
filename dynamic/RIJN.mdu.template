@@ -297,6 +297,8 @@ MorFile                                   = ${MorFile}          # Morphology set
 DredgeFile                                = ${DredgeFile}          # Dredging/dumping settings file (*.dad)
 MorCFL                                    = ${MorCFL}                   # Use CFL-like condition for morphologic updating (0=no, 1=yes) (default yes)
 DzbDtMax                                  = ${DzbDtMax}                 # Maximum bed level change (m) per time step for the case MorCFL=1 (default=0.1 m)
+MorphoPol                                 = ${MorphoPol}                                                                                                                                                                                                                                                                #
+InMorphoPol                               = ${InMorphoPol}                   # Value of the update inside MorphoPol (0=inside polygon no update, 1=inside polygon yes update)
 #------------------------------------------------------------------------------------------------------
 # Uneditable
 #------------------------------------------------------------------------------------------------------
