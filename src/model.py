@@ -353,9 +353,11 @@ def get_input(smt_settings):
         time_index += 1
 
 def adapt(model_settings, smt_settings):
-    
+    import re
+    variables_to_change = set([])
+    p = re.compile(r"context\['(.*)'\]")
+
     logger.info('Starting adaptation of source folder')
-    
     for item in glob.glob('**', recursive=True):
         if os.path.isfile(item): 
             head, tail = os.path.split(item)
@@ -374,6 +376,8 @@ def adapt(model_settings, smt_settings):
                 logger.debug(f'Rendering {full_filename_new}')
                 with open(full_filename_new, 'w') as f:                         
                     mytemplate = Template(filename=item, strict_undefined=True, input_encoding='utf-8')
+                    variables_to_change_update = set(p.findall(mytemplate._code))
+                    variables_to_change = variables_to_change.union(variables_to_change_update)
                     f.write(mytemplate.render(**model_settings).replace('\r',''))
                 if file_ext == '.sh': 
                     os.chmod(full_filename_new, 0o0777)
