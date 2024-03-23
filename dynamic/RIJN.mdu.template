@@ -131,7 +131,7 @@ SecondaryFlow                       = ${SecondaryFlow}                          
 #======================================================================================================
 # Uneditable
 #------------------------------------------------------------------------------------------------------
-CFLMax                              = 0.7                                                                 # Maximum Courant number [-]
+CFLMax                              = ${CFLMax}                                                                 # Maximum Courant number [-]
 AdvecType                           = 33                                                                  # Advection type [-] (33: Perot q(uio-u) fast)
 TimeStepType                        = 2                                                                   # Time step handling [-] (2: full implicit step-reduce)
 Icgsolver                           = 4                                                                   # Solver type [-] (4: sobekGS + Saadilud, 6: parallel/Petsc)
