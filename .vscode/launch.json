@@ -11,7 +11,7 @@
             "request": "launch",
             "program": "src/runsim.py",
             //"args": ["--clean"],
-            "cwd": "d:/projects/11206792-kpp-rivierkunde-2021/003_maas/06_models/M2D/j19/Grave_smt",
+            "cwd": ".",
             "console": "integratedTerminal", 
             "justMyCode": true
         }
