@@ -280,8 +280,8 @@ def get_input(smt_settings):
                     model_settings['Dtfacmax'] = 1.1     
                 if 'Tlfsmo' not in model_settings.keys():
                     model_settings['Tlfsmo'] = 0.0       
-                if 'morphopol' not in model_settings.keys():
-                    model_settings['morphopol'] = '' 
+                if 'MorphoPol' not in model_settings.keys():
+                    model_settings['MorphoPol'] = '' 
                 if 'InMorphoPol' not in model_settings.keys():
                     model_settings['InMorphoPol'] = '1' 
                 if 'cstbnd' not in model_settings.keys():
@@ -381,6 +381,8 @@ def adapt(model_settings, smt_settings):
                     f.write(mytemplate.render(**model_settings).replace('\r',''))
                 if file_ext == '.sh': 
                     os.chmod(full_filename_new, 0o0777)
+    #import pprint 
+    #pprint.pprint(set(model_settings.keys()) - variables_to_change)           
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         if 'DIMR_rtc_workdir' in smt_settings['model']:
             rtc_new_file = os.path.join('output','work',smt_settings['model']['DIMR_rtc_workdir'],'state_import.xml')
