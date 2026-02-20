@@ -152,8 +152,16 @@ def set_input(smt_settings, time_index):
     file_append = '_' + '_'.join(str(k) for k in (filename_settings.values()))
     model_settings['FileAppendix'] = file_append
     model_settings['TimeIndex'] = time_index
-    model_settings['nNodes'] = os.environ['NODES']
-    model_settings['nProc'] = os.environ['TASKS_PER_NODE']
+    if 'NODES' in os.environ.keys() and 'TASKS_PER_NODE' in os.environ.keys():
+        model_settings['nNodes'] = os.environ['NODES']
+        model_settings['nProc'] = os.environ['TASKS_PER_NODE']
+    else:
+        logger.info(f'Setting NODES=1 and TASKS_PER_NODE=1')
+        logger.info(f'For different settings, set these as environment variables e.g.:')
+        logger.info(f'$ export NODES=1 (on linux)')
+        logger.info(f'$ set NODES=1 (on Windows)')
+        model_settings['nNodes'] = 1
+        model_settings['nProc'] = 1
     if 'nNodesManual' in model_settings.keys(): 
         if model_settings['nNodesManual'] is not None: 
             model_settings['nNodes'] = model_settings['nNodesManual']
