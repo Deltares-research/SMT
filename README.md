@@ -12,24 +12,24 @@ Make sure python is available, e.g. by loading a module, or adding it to your pa
 
 Setup a virtual environment 
 ```
-python -m venv venv
+$ python -m venv venv
 ```
 
 Activate the environment by the following command on Linux
 ```
-source venv/bin/activate
+$ source venv/bin/activate
 ```
 Or use the following command on Windows:
 ```
-call venv\Scripts\activate.bat
+$ call venv\Scripts\activate.bat
 ```
 
 You should see `(venv)` at the start of your command line.
 
 Subsequently install the required dependencies in the virtual environment
 ```
-python -m pip install --upgrade pip
-python -m pip install mako pyyaml click pandas netCDF4 scipy
+(venv) $ python -m pip install --upgrade pip
+(venv) $ python -m pip install mako pyyaml click pandas netCDF4 scipy
 ```
 
 ## Running 
@@ -37,7 +37,7 @@ Acitvate the virtual environment (see above)
 
 Then simply call runsim.py with a dedicated .yml file from the folder where the .yml lives
 ```
-python src/runsim.py
+(venv) $ python src/runsim.py
 ```
 
 ```
