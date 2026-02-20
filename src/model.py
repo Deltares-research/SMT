@@ -152,8 +152,17 @@ def set_input(smt_settings, time_index):
     file_append = '_' + '_'.join(str(k) for k in (filename_settings.values()))
     model_settings['FileAppendix'] = file_append
     model_settings['TimeIndex'] = time_index
+    model_settings['nNodes'] = os.environ['NODES']
+    model_settings['nProc'] = os.environ['TASKS_PER_NODE']
+    if 'nNodesManual' in model_settings.keys(): 
+        if model_settings['nNodesManual'] is not None: 
+            model_settings['nNodes'] = model_settings['nNodesManual']
+    if 'nProcManual' in model_settings.keys(): 
+        if model_settings['nProcManual'] is not None: 
+            model_settings['nProc'] = model_settings['nProcManual']
+    model_settings['Partitions'] = int(model_settings['nNodes'])*int(model_settings['nProc'])
 
-    partition_total, processes_string = get_partition_total(smt_settings)
+    processes_string, partition_string = get_partition_total(model_settings['Partitions'])
     model_settings['ProcessesString'] = processes_string
 
     for key in model_settings.keys(): 
@@ -171,9 +180,8 @@ def get_input(smt_settings):
     while True and model_settings != None: 
         model_settings = set_input(smt_settings, time_index)
 
-        partition_total, _ = get_partition_total(smt_settings)
-
         if model_settings != None: 
+            processes_string, partition_string = get_partition_total(model_settings['Partitions'])
             logger.debug('Variables updated ...')
             for key in model_settings.keys():   
                 logger.debug(f'{key}: {model_settings[key]}')
@@ -204,7 +212,7 @@ def get_input(smt_settings):
                     restart_level = 3
                 
                 # Local database information exists
-                elif partition_path_exists(os.path.join('local_database',restart_file_database), head, partition_total):
+                elif partition_path_exists(os.path.join('local_database',restart_file_database), head, model_settings['Partitions']):
                     logger.info('Restart file found in local_database')
                     model_settings['RestartFileFromBackupLocation'] = os.path.join('local_database',restart_file_database)
                     model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_database)
@@ -218,8 +226,7 @@ def get_input(smt_settings):
                     restart_level = 0
                 else: 
                     # Local database does not exist and central database does
-                    logger.info('Restart file not found in local_database')
-                    if partition_path_exists(os.path.join('central_database',restart_file_database), head, partition_total):
+                    if partition_path_exists(os.path.join('central_database',restart_file_database), head, model_settings['Partitions']):
                         logger.info('Restart file found in central_database')
                         model_settings['RestartFileFromBackupLocation'] = os.path.join('central_database',restart_file_database)
                         model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',restart_file_database)
@@ -278,8 +285,70 @@ def get_input(smt_settings):
                     model_settings['MapOutputCount'] = 1
                 if 'Dtfacmax' not in model_settings.keys():
                     model_settings['Dtfacmax'] = 1.1     
+                if 'TStartTlfsmo' not in model_settings.keys():
+                    model_settings['TStartTlfsmo'] = time_start
                 if 'Tlfsmo' not in model_settings.keys():
-                    model_settings['Tlfsmo'] = 0.0       
+                    model_settings['Tlfsmo'] = 0.0
+                if 'morphopol' not in model_settings.keys():
+                    model_settings['morphopol'] = '' 
+                if 'InMorphoPol' not in model_settings.keys():
+                    model_settings['InMorphoPol'] = '1'
+                if 'cstbnd' not in model_settings.keys():
+                    model_settings['cstbnd'] = '0' 
+                if 'AngLat' not in model_settings.keys():
+                    model_settings['AngLat'] = '52.' 
+                if 'OLA_Discharge' not in model_settings.keys():
+                    model_settings['OLA_Discharge'] = '-999' 
+                if 'UpdateRefplane' not in model_settings.keys():
+                    model_settings['UpdateRefplane'] = '0' 
+                if 'RefplaneFile' not in model_settings.keys():
+                    model_settings['RefplaneFile'] = '' 
+                if 'MapFormat' not in model_settings.keys():
+                    model_settings['MapFormat'] = '4'                    # Map file format, 1: netCDF, 2: Tecplot, 3: netCFD and Tecplot, 4: NetCDF-UGRID
+                if 'NcFormat' not in model_settings.keys():
+                    model_settings['NcFormat'] = '3'                     # Format for all NetCDF output files (3: classic, 4: NetCDF4+HDF5)
+                if 'NcMapDataPrecision' not in model_settings.keys():
+                    model_settings['NcMapDataPrecision'] = 'double'      # Precision for NetCDF data in map files (double or single)
+                if 'NcHisDataPrecision' not in model_settings.keys():
+                    model_settings['NcHisDataPrecision'] = 'double'      # Precision for NetCDF data in his files (double or single)
+                if 'NcCompression' not in model_settings.keys():
+                    model_settings['NcCompression'] = '0'                # Whether or not (1/0) to apply compression to NetCDF output files - NOTE: only works when NcFormat = 4
+                if 'ExtForceFile' not in model_settings.keys(): 
+                    model_settings['ExtForceFile'] = ''        
+                if 'IALDiff' not in model_settings.keys(): 
+                    model_settings['IALDiff'] = '0'                      # [ - ] Whether or not (1/0) to apply diffusion in the active layer model
+                if 'ALDiff' not in model_settings.keys(): 
+                    model_settings['ALDiff'] = ''                        # [ - ] Whether or not (1/0) to apply diffusion in the active layer model
+                if 'UseCaching' not in model_settings.keys(): 
+                    model_settings['UseCaching'] = '1'        
+                if 'Wrishp_crs' not in model_settings.keys():  # cross sections 
+                    model_settings['Wrishp_crs'] = '0'
+                if 'Wrishp_obs' not in model_settings.keys():  # observation stations 
+                    model_settings['Wrishp_obs'] = '0'
+                if 'Wrishp_weir' not in model_settings.keys():  # weirs 
+                    model_settings['Wrishp_weir'] = '0'
+                if 'Wrishp_thd' not in model_settings.keys():  # thin dams 
+                    model_settings['Wrishp_thd'] = '0'
+                if 'Wrishp_gate' not in model_settings.keys():  # gates 
+                    model_settings['Wrishp_gate'] = '0'
+                if 'Wrishp_fxw' not in model_settings.keys():  # fixed weirs 
+                    model_settings['Wrishp_fxw'] = '0'
+                if 'Wrishp_src' not in model_settings.keys():  # source-sinks 
+                    model_settings['Wrishp_src'] = '0'
+                if 'Wrishp_pump' not in model_settings.keys():  # pumps 
+                    model_settings['Wrishp_pump'] = '0'
+                if 'Wrishp_dryarea' not in model_settings.keys():  # dry areas 
+                    model_settings['Wrishp_dryarea'] = '0'
+                if 'Wrishp_genstruc' not in model_settings.keys():  # general structures 
+                    model_settings['Wrishp_genstruc'] = '0'
+                if 'WriteDFMinterpretedvalues' not in model_settings.keys():  # interpreted values 
+                    model_settings['WriteDFMinterpretedvalues'] = '0'
+                if 'Wrimap_waterlevel_s0' not in model_settings.keys():  # output options
+                    model_settings['Wrimap_waterlevel_s0'] = '0'
+                if 'circumcenterMethod' not in model_settings.keys():  # geometry options - MAASMOR-217
+                    model_settings['circumcenterMethod'] = 'internalNetlinksEdge' 
+                if 'circumcenterTolerance' not in model_settings.keys():  # geometry options - MAASMOR-217
+                    model_settings['circumcenterTolerance'] = '1.0e-3'
                 # At this point we have read the desired SpinupTime and TimeDuration of the morphodynamic activity. 
                 # Now we have to find a DtUserModel which is close to the desired DtUser and allows for the setting of different DtUser related outputs
                 #
@@ -298,10 +367,11 @@ def get_input(smt_settings):
                 # To obtain the DtUserModel we search for a DtUserModel which is close to the proposed DtUser in the input file. 
                 maximum_DtUser = model_settings['TimeDuration']*tunit_in_seconds/model_settings['MapOutputCount']
                 model_settings['DtUserModel'] = maximum_DtUser/np.ceil(maximum_DtUser/model_settings['DtUser'])
-
                 #  
                 # Next the SpinupTimeModel is increased to be a multiple of the DtUserModel
-                model_settings['SpinupTimeModel'] = np.ceil(model_settings['SpinupTime']/model_settings['DtUserModel'])*model_settings['DtUserModel']/tunit_in_seconds
+                spinup_time_seconds = np.ceil(model_settings['SpinupTime']/model_settings['DtUserModel'])*model_settings['DtUserModel']
+                model_settings['Tlfsmo'] = spinup_time_seconds*0.5
+                model_settings['SpinupTimeModel'] = spinup_time_seconds/tunit_in_seconds
                 model_settings['HisIntervalStepModel'] = np.ceil(model_settings['HisIntervalStep']/model_settings['DtUserModel'])*model_settings['DtUserModel']
                 model_settings['TrtDtModel'] = model_settings['DtUserModel']
 
@@ -339,6 +409,7 @@ def get_input(smt_settings):
                     model_settings['DIMR_dflowfm_workdir'] = smt_settings['model']['DIMR_dflowfm_workdir']
                 if 'DIMR_rtc_workdir' in smt_settings['model']:
                     model_settings['DIMR_rtc_workdir'] = smt_settings['model']['DIMR_rtc_workdir']
+                model_settings['FileBase'] = head
             yield model_settings
 
         # increase counter 
@@ -374,10 +445,10 @@ def adapt(model_settings, smt_settings):
             rtc_new_file = os.path.join('output','work',smt_settings['model']['DIMR_rtc_workdir'],'state_import.xml')
 
         head, _ = os.path.splitext(smt_settings['model']['input'])
-        partition_total, _ = get_partition_total(smt_settings)
+        processes_string, partition_string = get_partition_total(model_settings['Partitions'])
 
-        for partition_number in range(partition_total): 
-            if partition_total == 1: 
+        for partition_number in range(model_settings['Partitions']): 
+            if model_settings['Partitions'] == 1: 
                 partition_string = '' 
             else: 
                 partition_string = f'_{partition_number:04}'
@@ -413,10 +484,10 @@ def finalize(model_settings, smt_settings):
     
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
         head, _ = os.path.splitext(smt_settings['model']['input'])
-        partition_total, _ = get_partition_total(smt_settings)
-        
-        for partition_number in range(partition_total): 
-            if partition_total == 1: 
+        processes_string, partition_string = get_partition_total(model_settings['Partitions'])
+
+        for partition_number in range(model_settings['Partitions']): 
+            if model_settings['Partitions'] == 1: 
                 partition_string = '' 
             else: 
                 partition_string = f'_{partition_number:04}'
@@ -435,17 +506,16 @@ def finalize(model_settings, smt_settings):
                 rtc_file = [rtc for rtc in glob.glob('output/work/**/**/state_export.xml', recursive=True)][-1]
                 tools.copy(rtc_file, model_settings['RTCFileToBackupLocation'])
 
-def get_partition_total(smt_settings): 
+def get_partition_total(partition_total): 
     # get total number of partitions
-    if 'nNodes' in smt_settings['variables']['user'].keys(): 
-        if 'nProc' in smt_settings['variables']['user'].keys(): 
-            partition_total = smt_settings['variables']['user']['nNodes']*smt_settings['variables']['user']['nProc']
-            processes_string = ' '.join([str(j) for j in range(partition_total)])
+    if partition_total > 1:
+        processes_string = ' '.join([str(j) for j in range(partition_total)])
+        partition_string = '_merged'
     else: 
         partition_total = 1
         processes_string = '0'
-    return partition_total, processes_string
-
+        partition_string = '' 
+    return processes_string, partition_string
 
 
 def partition_path_exists(restartfile, head, partition_total): 

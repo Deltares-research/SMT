@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 import time # for timezone information 
 import shutil
 import math 
+import numpy as np
 
 global logger 
 
@@ -84,9 +85,17 @@ def netcdf_copy(src_netcdf, dst_netcdf, exclude_list):
             dst.setncattr('date_created', now.strftime('%Y-%m-%dT%H:%M:%S') + time.strftime('%z', time.gmtime()))
             dst.setncattr('date_modified', now.strftime('%Y-%m-%dT%H:%M:%S') + time.strftime('%z', time.gmtime()))
 
+            # loop over variables to find dimensions to copy
+            dimension_names = set()
+            for name, variable in src.variables.items():
+                if name in exclude_list: 
+                   continue
+                dimension_names.update(variable.dimensions) 
+
             # copy dimensions 
             for name, dimension in src.dimensions.items():
-                dst.createDimension(name, len(dimension) if not dimension.isunlimited() else None)
+                if name in dimension_names:
+                    dst.createDimension(name, len(dimension) if not dimension.isunlimited() else None)
 
             # copy variables
             for name, variable in src.variables.items():
@@ -114,6 +123,13 @@ def netcdf_append(src_netcdf, dst_netcdf, append_list):
             # Update date_modified attribute
             now = datetime.now()
             dst.setncattr('date_modified', now.strftime('%Y-%m-%dT%H:%M:%S') + time.strftime('%z', time.gmtime()))
+            
+            # check that the ordering of the flow nodes and links is the same
+            for location_name in ['FlowLink_xu','FlowLink_yu','FlowElem_xcc','FlowElem_ycc','FlowElem_xzw','FlowElem_yzw','FlowElem_xbnd','FlowElem_ybnd']:
+                if location_name in dst.variables.keys():
+                    if location_name in src.variables.keys():
+                        assert np.max(dst.variables[location_name][:]-src.variables[location_name][:])<1e-9, \
+                               f'location {location_name} is not the same in {src_netcdf} and {dst_netcdf}'
 
             # copy variables
             for name, variable in src.variables.items():

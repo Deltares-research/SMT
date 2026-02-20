@@ -18,7 +18,7 @@ def print_version(ctx, param, value):
     import netCDF4
     if not value or ctx.resilient_parsing:
         return
-    click.echo('SMT version 2.0.' + '$Revision$'.split(' ')[1])
+    click.echo('SMT version 2.0.' + '$Revision: 2303 $'.split(' ')[1])
     click.echo('--dependencies---')
     click.echo(f'click : {click.__version__}')
     click.echo(f'logging: {logging.__version__}')
