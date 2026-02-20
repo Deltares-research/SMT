@@ -1,0 +1,66 @@
+info:
+  created_by: Willem Ottevanger
+  date: 2020-04-28 16:49:36
+  version: 1
+application: 
+  name: D-FlowFM 
+  command: 
+    Windows: 
+      - start_dflowfm_autostartstop.bat
+    Linux: 
+      - run_dflowfm.sh 
+  flags: 
+    Windows: 
+    Linux: 
+      - -v 
+      - 1.2.98.66318
+  input: # These files are not renamed
+    - .mdu
+    - .xml
+model: 
+  input: simplechannel.mdu
+  simulation_type: quasi-steady-hydrograph  # TODO: monte-carlo for Monte Carlo
+  exclude_from_database:  # netcdf variables to be excluded from database
+    - FlowElem_bl
+    - mor_bl
+    - bl_bnd 
+    - bodsed
+  load_from_database: True
+  DIMR_dflowfm_workdir: . #DIMR dflowfm working dir
+  #use_last_output: True   # use last output for netcdf variables excluded from database
+variables: 
+  automatic: 
+    TStart:
+    TStop:
+    MapInterval:
+    RstInterval:
+    RestartFile: 
+    RestartDateTime:
+    MorStt:
+  user:   
+    TUnit: S
+    ReferenceDate: '20231212'   # yyyymmdd
+    SpinupTime: 
+      - 10   # 0: flow field from local database - minor adjustment needed
+      - 10   # 1: flow field from central database - significant adjustment may be needed 
+      - 30   # 2: Starting from final result of last simulation - long adjustment needed 
+      - 30   # 3: no restart file - long adjustment needed (cold-start startup)
+    Tlfsmo: 100   # Constant Tlfsmo
+    DtMax: 10.                 # Maximal computation timestep (s)
+    Dtfacmax: 1.1                 # Max timestep increase factor ( )
+    DtInit: 1.                  # Initial computation timestep (s)
+    DtUser: 10
+    HisIntervalStep: 1.0  # Will be adjusted according to determined DtUserModel
+    MorFac:       # Discharge dependent MorFac
+      Discharge: 
+        2000: 36
+        3000: 24
+        4000: 12
+        6000: 6
+        10000: 6
+    Discharge: 
+      TimeDuration: # TimeDuration dependent Discharge - formerly QSeries file [- TUnits: Discharge]
+      - 10: 2000
+      - 20: 10000
+      - 10: 4000
+    OutputDir: 'dflowfmoutput' # Output Directory
