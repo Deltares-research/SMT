@@ -8,45 +8,37 @@ It was first developed in the context of the sustainable fairway in the Rhine [1
 
 ## Installation
 
-Install Anaconda (This can be downloaded from the Anaconda website [2]) or Miniconda [3]. See also the Anaconda docs for more information on environments [4]
-Start an Anaconda command prompt from the Windows start menu, or activate the correct paths under linux. 
+Make sure python is available, e.g. by loading a module, or adding it to your path.
 
-On the h7 linux cluster Anaconda can be activated using the following steps:
+Setup a virtual environment 
+```
+python -m venv venv
+```
 
-Load the anaconda3 module
- `module load anaconda3/miniconda`
+Activate the environment by the following command on Linux
+```
+source venv/bin/activate
+```
+Or use the following command on Windows:
+```
+call venv\Scripts\activate.bat
+```
 
-Next activate conda
- `conda init`
+You should see `(venv)` at the start of your command line.
 
-Now should source the bash startup script again to really activate the conda environment
- `source ~/.bashrc`
-If succesful, you should see (base) at the start of your prompt.
-
-Next set a writable directory for your packages to be installed
- `conda config --add pkgs_dirs ~/.conda/pkgs/`
-Next generate an environment with the following dependencies with the name `smt2_h7` - because your home folder used on the h6c7 is still accessible from h7, but the conda version is different.
-
- `conda create --name smt2_h7 python=3 mako pyyaml click pandas netCDF4`
-
-<!--
-To run the simulation use the start_h7.sh script
-
- `./start_h7.sh`  
-Thats it - your model should now run.
-
-Some of the example simulations require extra packages. To install these run the following commands: 
- `conda activate smt2`  
- `conda install geopandas`
- `conda install matplotlib`
---> 
+Subsequently install the required dependencies in the virtual environment
+```
+python -m pip install --upgrade pip
+python -m pip install mako pyyaml click pandas netCDF4 scipy
+```
 
 ## Running 
-To run the SMT, first activate the `smt` environment
- `conda activate smt2_h7`
+Acitvate the virtual environment (see above)
 
 Then simply call runsim.py with a dedicated .yml file from the folder where the .yml lives
- `python src/runsim.py` 
+```
+python src/runsim.py
+```
 
 ```
 Usage: runsim.py [OPTIONS]
@@ -69,6 +61,7 @@ Python files
 - runsim.py        - Main routine
 - tools.py         - Various helper tools
 - interpolation.py - Interpolation tools 
+- extra/refplane.py - A special addition to update reference planes. This script can be called from your application.
 
 Other files 
 - logging.conf   - Configuration file for logger 
@@ -135,12 +128,6 @@ ModuleNotFoundError: No module named 'click'
 ## References
 
 [1] Yossef, M. F. M., Jagers, H. R. A., Van Vuren, S., and Sieben, J. (2008). Innovative techniques in modelling large-scale river morphology, River Flow 2008 - Proc. Int. Conf. Fluvial Hydraulics, Çesme, Izmir, Turkey 1065-1074
-
-[2] Anaconda (2020), Software package available from https://www.anaconda.com/products/individual
-
-[3] Miniconda (2020), Lightweight Anaconda package available from https://docs.conda.io/en/latest/miniconda.html
-
-[4] Anaconda (2020b), https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands
 
 <!--- at revision 16306 --->
 
