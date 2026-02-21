@@ -505,7 +505,8 @@ def adapt(model_settings, smt_settings):
                     tools.remove(rtc_new_file)
                     tools.copy(model_settings['RTCFileFromBackupLocation'], rtc_new_file)
                 if model_settings['TimeIndex'] > 0: 
-                    last_output_restart_file = f'output/{model_settings["TimeIndex"] - 1}/{model_settings["OutputDir"]}/{model_settings["RestartFile"].replace(head, f'{head}{partition_string}')}'
+                    restart_file_name = model_settings["RestartFile"].replace(head, f'{head}{partition_string}')
+                    last_output_restart_file = f'output/{model_settings["TimeIndex"] - 1}/{model_settings["OutputDir"]}/{restart_file_name}'
                     tools.netcdf_append(last_output_restart_file, os.path.join('output','work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), 
                                         smt_settings['model']['exclude_from_database'])
                     # if 'DIMR_rtc_workdir' in smt_settings['model']:
@@ -513,7 +514,8 @@ def adapt(model_settings, smt_settings):
                     #     tools.remove(rtc_new_file)
                     #     tools.copy(last_output_rtc_file, rtc_new_file)                
             elif model_settings['RestartLevel'] == 2: 
-                last_output_restart_file = f'output/{model_settings["TimeIndex"] - 1}/{model_settings["OutputDir"]}/{model_settings["RestartFile"].replace(head, f'{head}{partition_string}')}'
+                restart_file_name = model_settings["RestartFile"].replace(head, f'{head}{partition_string}')
+                last_output_restart_file = f'output/{model_settings["TimeIndex"] - 1}/{model_settings["OutputDir"]}/{restart_file_name}'
                 tools.netcdf_copy(last_output_restart_file, os.path.join('output','work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), [])   # copy all data
                 if 'DIMR_rtc_workdir' in smt_settings['model']:
                     last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
