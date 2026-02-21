@@ -21,10 +21,19 @@ model:
   input: simplechannel.mdu
   simulation_type: quasi-steady-hydrograph  # TODO: monte-carlo for Monte Carlo
   exclude_from_database:  # netcdf variables to be excluded from database
+    - time
     - FlowElem_bl
     - mor_bl
     - bl_bnd 
     - bodsed
+    - lyrfrac
+    - morft
+    - thlyr
+    - msed
+    - mesh1d_mor_crs_n
+    - mesh1d_mor_crs_z
+    - preload         
+    - sedshort      
   load_from_database: True
   DIMR_dflowfm_workdir: . #DIMR dflowfm working dir
   #use_last_output: True   # use last output for netcdf variables excluded from database

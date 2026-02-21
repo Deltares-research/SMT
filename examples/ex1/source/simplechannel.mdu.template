@@ -269,7 +269,7 @@ RestartDateTime                           = ${RestartDateTime}      # Restart da
 
 [external forcing]
 ExtForceFile                              =                                       # Old format for external forcings file *.ext, link with tim/cmp-format boundary conditions specification
-ExtForceFileNew                           = ../../boundary_conditions/flow/simplechannel${FileAppendix}.ext                     # New format for external forcings file *.ext, link with bc     -format boundary conditions specification
+ExtForceFileNew                           = boundary_conditions/flow/simplechannel${FileAppendix}.ext                     # New format for external forcings file *.ext, link with bc     -format boundary conditions specification
 Rainfall                                  = 0                   # Include rainfall, (0=no, 1=yes)
 QExt                                      = 0                   # Include user Qin/out, externally provided, (0=no, 1=yes)
 Evaporation                               = 0                   # Include evaporation in water balance, (0=no, 1=yes)
