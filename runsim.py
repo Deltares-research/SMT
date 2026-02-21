@@ -67,12 +67,6 @@ def runner(settings, clean, backup):
 
     # get model input 
     for model_settings in model.get_input(smt_settings): 
-        # check if output exists from previous run
-        new_output_folder = os.path.join('output', str(model_settings['TimeIndex']))
-        if os.path.exists(new_output_folder): 
-            logger.info(f'Output folder {new_output_folder} exists, skipping ...')
-            continue
-
         # apply input 
         if os.path.exists(os.path.join('output','work')):
             shutil.rmtree(os.path.join('output','work'))
@@ -88,7 +82,7 @@ def runner(settings, clean, backup):
 
         # finalize model step
         model.finalize(model_settings, smt_settings)
-        shutil.move(os.path.join('output','work'), new_output_folder)
+        shutil.move(os.path.join('output','work'), model_settings['OutputFolder'])
 
 
 if __name__ == '__main__':

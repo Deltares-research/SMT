@@ -152,6 +152,14 @@ def set_input(smt_settings, time_index):
     file_append = '_' + '_'.join(str(k) for k in (filename_settings.values()))
     model_settings['FileAppendix'] = file_append
     model_settings['TimeIndex'] = time_index
+
+    # check if output exists from previous run
+    model_settings['ContinuationRun'] = False
+    model_settings['OutputFolder'] = os.path.join('output', str(model_settings['TimeIndex']))
+    if os.path.exists(model_settings['OutputFolder']): 
+        model_settings['ContinuationRun'] = True
+        return model_settings
+
     if 'NODES' in os.environ.keys() and 'TASKS_PER_NODE' in os.environ.keys():
         model_settings['nNodes'] = os.environ['NODES']
         model_settings['nProc'] = os.environ['TASKS_PER_NODE']
@@ -184,9 +192,26 @@ def get_input(smt_settings):
 
     time_index = 0
     time_start = 0.
+    
     model_settings = []
     while True and model_settings != None: 
         model_settings = set_input(smt_settings, time_index)
+        if model_settings is None:
+            continue
+        if model_settings['ContinuationRun']: 
+            logger.info(f'Output folder output/{model_settings["TimeIndex"]} exists, skipping ...')
+            # increase counter 
+            time_index += 1
+
+            # Read tstart from qsh.yml if it exists
+            qsh_file = os.path.join('output', str(model_settings["TimeIndex"]), 'qsh.yml')
+            if os.path.exists(qsh_file):
+                with open(qsh_file, 'r') as f:
+                    qsh_data = yaml.load(f, Loader=yaml.SafeLoader)
+                    if qsh_data and 'TStop' in qsh_data:
+                        time_start = qsh_data['TStop']
+                        logger.info(f'Loaded TStart from {qsh_file}: {time_start}')            
+            continue
 
         if model_settings != None: 
             processes_string, partition_string = get_partition_total(model_settings['Partitions'])
@@ -402,7 +427,6 @@ def get_input(smt_settings):
                 model_settings['RestartDateTimeStop'] = datetime.strftime(refdate + timedelta(seconds = np.round(time_stop_seconds)), '%Y%m%d_%H%M%S')
                 validate_output_time(his_time_near_start, model_settings['DtUserModel'], 'HisIntervalStart', 'DtUserModel')
                 model_settings['HisInterval'] = f"{model_settings['HisIntervalStepModel']:.16f} {his_time_near_start:.16f} {time_stop_seconds:.16f}"
-                time_start = model_settings['TStop']
 
                 model_settings['RestartFile'] = ''
                 model_settings['RestartFileLocation'] = '' # restart_file_database
@@ -418,6 +442,10 @@ def get_input(smt_settings):
                 if 'DIMR_rtc_workdir' in smt_settings['model']:
                     model_settings['DIMR_rtc_workdir'] = smt_settings['model']['DIMR_rtc_workdir']
                 model_settings['FileBase'] = head
+
+                # At the end of the loop, save time_start such that Tstart can be updated in the next iteration.
+                time_start = model_settings['TStop']
+
             yield model_settings
 
         # increase counter 
@@ -455,6 +483,14 @@ def adapt(model_settings, smt_settings):
         head, _ = os.path.splitext(smt_settings['model']['input'])
         processes_string, partition_string = get_partition_total(model_settings['Partitions'])
 
+        with open(os.path.join('output','work','qsh.yml'), 'w') as f:
+            model_settings['TStop'] = float(model_settings['TStop'])
+            yaml.dump({k: model_settings[k] for k in ['RestartLevel',
+                                                      'ReferenceDate',
+                                                      'TStart',
+                                                      'TStop',
+                                                      'RestartDateTime',
+                                                      'RestartDateTimeStop']}, f)
         for partition_number in range(model_settings['Partitions']): 
             if model_settings['Partitions'] == 1: 
                 partition_string = '' 
@@ -469,9 +505,7 @@ def adapt(model_settings, smt_settings):
                     tools.remove(rtc_new_file)
                     tools.copy(model_settings['RTCFileFromBackupLocation'], rtc_new_file)
                 if model_settings['TimeIndex'] > 0: 
-                    files = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"] - 1}/**/**/{head}{partition_string}**_rst.nc', recursive=True)]
-                    files.sort(key=os.path.getmtime)  
-                    last_output_restart_file = files[-1]
+                    last_output_restart_file = f'output/{model_settings["TimeIndex"] - 1}/{model_settings["OutputDir"]}/{model_settings["RestartFile"].replace(head, f'{head}{partition_string}')}'
                     tools.netcdf_append(last_output_restart_file, os.path.join('output','work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), 
                                         smt_settings['model']['exclude_from_database'])
                     # if 'DIMR_rtc_workdir' in smt_settings['model']:
@@ -479,7 +513,7 @@ def adapt(model_settings, smt_settings):
                     #     tools.remove(rtc_new_file)
                     #     tools.copy(last_output_rtc_file, rtc_new_file)                
             elif model_settings['RestartLevel'] == 2: 
-                last_output_restart_file = [rst for rst in glob.glob(f'output/{model_settings["TimeIndex"] - 1}/**/**/{head}{partition_string}**_rst.nc', recursive=True)][-1]
+                last_output_restart_file = f'output/{model_settings["TimeIndex"] - 1}/{model_settings["OutputDir"]}/{model_settings["RestartFile"].replace(head, f'{head}{partition_string}')}'
                 tools.netcdf_copy(last_output_restart_file, os.path.join('output','work',model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')), [])   # copy all data
                 if 'DIMR_rtc_workdir' in smt_settings['model']:
                     last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
