@@ -484,6 +484,7 @@ def adapt(model_settings, smt_settings):
         processes_string, partition_string = get_partition_total(model_settings['Partitions'])
 
         with open(os.path.join('output','work','qsh.yml'), 'w') as f:
+            model_settings['TStart'] = float(model_settings['TStart'])
             model_settings['TStop'] = float(model_settings['TStop'])
             yaml.dump({k: model_settings[k] for k in ['RestartLevel',
                                                       'ReferenceDate',
