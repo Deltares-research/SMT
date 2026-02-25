@@ -22,7 +22,7 @@ import os, time, sys, run, adaptsrc, fileinput, subprocess
 
 try:
     git_version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], stderr=subprocess.DEVNULL).decode().strip()
-    git_location = subprocess.check_output(['git', 'rev-parse', '--git-dir'], stderr=subprocess.DEVNULL).decode().strip()
+    git_location = f'https://github.com/Deltares-research/SMT/tree/{subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()}'
 except Exception:
     git_version = 'unknown' 
     git_location = 'https://github.com/Deltares-research/SMT/tree/delft3d4'
@@ -31,8 +31,8 @@ except Exception:
 # MINOR version when you add functionality in a backward compatible manner
 # PATCH version when you make backward compatible bug fixes
     
-print(f'Simulation Management Tool (SMT) version 1.0.2 (git commit: {git_version})')
-print(f'The repository can be found at {git_location}')
+print(f'Simulation Management Tool (SMT) version 1.0.3 (git commit: {git_version})')
+print(f'The repository can be found at {git_location} .')
 print()
 
 #===================================================================
