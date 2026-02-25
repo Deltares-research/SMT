@@ -1,108 +1,129 @@
-# load libraries 
-import click
-import logging
-import glob 
-import mako
-import os
-import platform
-import sys 
-import scipy
-import yaml 
-import shutil
+# Simulation Management Tool (DVRII version)
+# Top level file to run simulation
+#    Copyright (C) 2016  Deltares
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# $HeadURL: https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/SMT/trunk/runsim.py $ 
+# $Id: runsim.py 20368 2026-02-20 08:01:32Z ottevan $ 
+# 
+#===================================================================
+# Import modules
+#===================================================================
+import os, time, sys, run, adaptsrc, fileinput
 
-#load modules
-import tools
-import model
-from application import Application
+try:
+    git_version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], stderr=subprocess.DEVNULL).decode().strip()
+except Exception:
+    git_version = 'unknown'
+# Versioning follows semantic versioning: https://semver.org/ - major.minor.patch
+# MAJOR version when you make incompatible API changes
+# MINOR version when you add functionality in a backward compatible manner
+# PATCH version when you make backward compatible bug fixes
+    
+print(f'Simulation Mangement Tool (SMT) version 1.0.1 (git commit: {git_version}))
+print()
 
-def print_version(ctx, param, value):
-    import netCDF4
-    import subprocess
-    import importlib
-    if not value or ctx.resilient_parsing:
-        return
-    try:
-        git_version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], stderr=subprocess.DEVNULL).decode().strip()
-    except Exception:
-        git_version = 'unknown'
-    # Versioning follows semantic versioning: https://semver.org/ - major.minor.patch
-    # MAJOR version when you make incompatible API changes
-    # MINOR version when you add functionality in a backward compatible manner
-    # PATCH version when you make backward compatible bug fixes
-    click.echo(f'SMT version 2.1.1 (git commit: {git_version})')
+#===================================================================
+# Set some constants
+#===================================================================
+timeformat = '%a %d %b %Y %H:%M:%S'
+Time = 0
+Rrun = 0
+#Qseries = sys.stdin
+print('opening Qseries')
+Qseries = open('Qseries','r')
+print('opening Qseries done')
+sys.stdout.flush()
 
-    # Print versions of dependencies
-    click.echo('--dependencies---')
-    click.echo(f'click : {importlib.metadata.version("click")}')
-    click.echo(f'logging: {logging.__version__}')
-    click.echo(f'mako: {mako.__version__}')  
-    click.echo(f'netCDF4: {netCDF4.__version__}')  
-    click.echo(f'yaml: {yaml.__version__}')  
-    # Optional dependency - used for refplane.py
-    try:
-        import scipy
-        click.echo(f'scipy: {scipy.__version__}')
-    except ImportError as e:
-        pass
-    ctx.exit()
+#===================================================================
+# Set runid's of the simulation
+#===================================================================
+RunIDs = adaptsrc.getRunIDs()
+TrisimParameters = adaptsrc.getTrisimParameters()
+OLA_Discharge = adaptsrc.getOLADischarge()
 
-@click.command()
-@click.option('-v', '--version', is_flag=True, callback=print_version,
-              expose_value=False, is_eager=True, help='Print version information')
-@click.option('-s', '--settings', default='smt.yml', help='SMT settings YAML file (default = smt.yml)')
-@click.option('-c', '--clean', is_flag=True, help='Flag indicating whether previous output and local_database should be cleaned')
-@click.option('-b', '--backup', is_flag=True, help='Flag indicating whether central_database should be replaced by local_database')
-def runner(settings, clean, backup): 
-    # create logger
-    logger = tools.init_logger()
+print('SIMULATION STARTED AT')
+print(time.strftime(timeformat+' %Z',time.localtime(time.time())))
+print() 
+print('Simulation composed of domains:')
+print()
+for runid in RunIDs:
+  print(' *',runid)
+print()
+print('============================================')
+sys.stdout.flush()
 
-    # read input 
-    smt_settings = model.read(settings)
+#===================================================================
+# If Qseries file exists, start processing it ...
+#===================================================================
+LineNr = 0
+while 1:
+  LineNr = LineNr + 1
+  line = Qseries.readline()
+  if len(line)==0: break
+  #print 'Line',LineNr,': "'+line[:-1]+'"'
+  #-------------------------------------------------------
+  # For each line in Qseries ...
+  #-------------------------------------------------------
+  #
+  values = line.split()
+  #
+  # skip empty lines ...
+  #
+  if len(values)==0: continue
+  #
+  # skip comment lines ...
+  #
+  if values[0][0]=='*': continue
+  #
+  Discharge = eval(values[0])
+  Period = eval(values[1])
+  TimeEnd = Time+Period
+  #
+  Error = 0
+  #
+  print(time.strftime(timeformat,time.localtime(time.time())))
+  print('Period from',Time,'until',TimeEnd)
+  print(' * Discharge =',Discharge,'m^3/s')
+  print('--------------------------------------------')
+  sys.stdout.flush()
+  #print 'run',Time,TimeEnd,Discharge 
+  if Discharge == OLA_Discharge:
+    print('OLA Computation -- Updating Reference Plane')
+    sys.stdout.flush()
+    newTimeEnd = run.run(RunIDs,TrisimParameters,Time,TimeEnd,OLA_Discharge,'source','Y')
+    print('OLA Computation -- Updating Reference Plane complete')
+    sys.stdout.flush()
+  else:
+    newTimeEnd = run.run(RunIDs,TrisimParameters,Time,TimeEnd,Discharge,'source','N')
+  if newTimeEnd != TimeEnd:
+    TimeEnd = newTimeEnd
+    print('--------------------------------------------')
+    print('Corrected simulation period information')
+    print('Period from',Time,'until',TimeEnd)
+    print(' * Discharge =',Discharge,'m^3/s')
+  print('============================================')
+  sys.stdout.flush()
+  Time = TimeEnd
+  Rrun = 1
+  #
+  if Error != 0: break
 
-    # check input 
-    model.validate(smt_settings)
+print('SIMULATION FINISHED AT')
+print(time.strftime(timeformat,time.localtime(time.time())))
+print('=============================')
 
-    # clean previous simulation 
-    if clean: 
-        logger.info(f'Cleaning previous output')
-        if os.path.exists('output'):
-            shutil.rmtree('output')
-        if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
-            logger.info(f'Removing local_database')
-            if os.path.exists('local_database'):
-                shutil.rmtree('local_database')
-        logger.info(f'Finished cleaning previous output')
-        exit()
-
-    if backup: 
-        if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
-            shutil.copytree('local_database', 'central_database')
-        exit()
-
-    if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
-        tools.guaranteedir('central_database')
-        tools.guaranteedir('local_database')
-        tools.guaranteedir('output')
-
-    # get model input 
-    for model_settings in model.get_input(smt_settings): 
-        # apply input 
-        if os.path.exists(os.path.join('output','work')):
-            shutil.rmtree(os.path.join('output','work'))
-        shutil.copytree('source',os.path.join('output','work'))
-        model.adapt(model_settings, smt_settings)
-        tools.remove(os.path.join('output','work','**','**.template'))
-   
-        # run model step
-        platform_system = platform.system()
-        app = Application(run_script=smt_settings['application']['command'][platform_system],
-                          run_flags=smt_settings['application']['flags'][platform_system])
-        app.run(os.path.join('output','work'), smt_settings['model']['input'])
-
-        # finalize model step
-        model.finalize(model_settings, smt_settings)
-        shutil.move(os.path.join('output','work'), model_settings['OutputFolder'])
-
-
-if __name__ == '__main__':
-    runner()
+if (Qseries != sys.stdin):
+  Qseries.close()
