@@ -14,25 +14,25 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-# $HeadURL: https://svn.oss.deltares.nl/repos/openearthtools/trunk/python/applications/SMT/trunk/runsim.py $ 
-# $Id: runsim.py 20368 2026-02-20 08:01:32Z ottevan $ 
 # 
 #===================================================================
 # Import modules
 #===================================================================
-import os, time, sys, run, adaptsrc, fileinput
+import os, time, sys, run, adaptsrc, fileinput, subprocess
 
 try:
     git_version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], stderr=subprocess.DEVNULL).decode().strip()
+    git_location = subprocess.check_output(['git', 'rev-parse', '--git-dir'], stderr=subprocess.DEVNULL).decode().strip()
 except Exception:
-    git_version = 'unknown'
+    git_version = 'unknown' 
+    git_location = 'https://github.com/Deltares-research/SMT/tree/delft3d4'
 # Versioning follows semantic versioning: https://semver.org/ - major.minor.patch
 # MAJOR version when you make incompatible API changes
 # MINOR version when you add functionality in a backward compatible manner
 # PATCH version when you make backward compatible bug fixes
     
-print(f'Simulation Mangement Tool (SMT) version 1.0.1 (git commit: {git_version}))
+print(f'Simulation Management Tool (SMT) version 1.0.2 (git commit: {git_version})')
+print(f'The repository can be found at {git_location}')
 print()
 
 #===================================================================

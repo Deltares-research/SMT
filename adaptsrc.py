@@ -151,7 +151,7 @@ def adaptsrc(worksep,RunIDs,TStart,TStop,Disch,**dict):
     for i in range(len(lines)):
       line = lines[i] 
       #
-      A = re.split('\s*=\s*',line,1)
+      A = re.split('\\s*=\\s*',line,1)
       if len(A)<2:
         keyword = ''
         value = A[0]
@@ -253,7 +253,7 @@ def adaptsrc(worksep,RunIDs,TStart,TStop,Disch,**dict):
       #  elif keyword=='keyw2'
       #    line = 'keyw2 = value2'
       if comparekeyword(keyword,'Filmor'):
-        A = re.split('\s*=\s*',line,1)
+        A = re.split('\\s*=\\s*',line,1)
         if len(A)<2:
           keyword = ''
           value = A[0]
@@ -279,7 +279,7 @@ def adaptsrc(worksep,RunIDs,TStart,TStop,Disch,**dict):
         for i in range(len(lines)):
           line = lines[i]
           #
-          A = re.split('\s*=\s*',line,1)
+          A = re.split('\\s*=\\s*',line,1)
           if len(A)<2:
             keyword = ''
             value = A[0]
