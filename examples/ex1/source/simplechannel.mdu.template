@@ -108,7 +108,7 @@ Fixedweirtopwidth                         = 3.                  # Uniform width 
 Fixedweirtopfrictcoef                     = -999.               # Uniform friction coefficient of the groyne part of fixed weirs
 Fixedweirtalud                            = 0.25                # Uniform talud slope of fixed weirs
 Izbndpos                                  = 0                   # Position of z boundary (0: D3Dflow, 1: on net boundary, 2: on specified polyline)
-Tlfsmo                                    = 0.                  # Fourier smoothing time (s) on water level boundaries
+Tlfsmo                                    = ${Tlfsmo}           # Fourier smoothing time (s) on water level boundaries
 Logprofatubndin                           = 1                   # ubnds inflow: 0=uniform U1, 1 = log U1, 2 = user3D
 Logprofkepsbndin                          = 0                   # inflow: 0=0 keps, 1 = log keps inflow, 2 = log keps in and outflow
 Slopedrop2D                               = 0.3                 # Apply drop losses only if local bed slope > Slopedrop2D, (<=0: no drop losses)

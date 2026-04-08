@@ -54,7 +54,8 @@ variables:
       - 10   # 1: flow field from central database - significant adjustment may be needed 
       - 30   # 2: Starting from final result of last simulation - long adjustment needed 
       - 30   # 3: no restart file - long adjustment needed (cold-start startup)
-    Tlfsmo: 100   # Constant Tlfsmo
+    UseTlfsmo: 1  # 0: do not use Tlfsmo, 1: use Tlfsmo specified, 2: (set to 50% of SpinupTime)
+    Tlfsmo: 0.0  # Fourier smoothing time on boundaries (s) 
     DtMax: 10.                 # Maximal computation timestep (s)
     Dtfacmax: 1.1                 # Max timestep increase factor ( )
     DtInit: 1.                  # Initial computation timestep (s)
