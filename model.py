@@ -407,6 +407,8 @@ def get_input(smt_settings):
                 spinup_time_seconds = np.ceil(model_settings['SpinupTime']/model_settings['DtUserModel'])*model_settings['DtUserModel']
                 if model_settings['UseTlfsmo'] == 2:
                     model_settings['Tlfsmo'] = spinup_time_seconds*0.5
+                if model_settings['UseTlfsmo'] == 0:
+                    model_settings['Tlfsmo'] = 0.0
                 model_settings['SpinupTimeModel'] = spinup_time_seconds/tunit_in_seconds
                 model_settings['HisIntervalStepModel'] = np.ceil(model_settings['HisIntervalStep']/model_settings['DtUserModel'])*model_settings['DtUserModel']
                 model_settings['TrtDtModel'] = model_settings['DtUserModel']
