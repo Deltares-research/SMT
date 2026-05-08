@@ -36,7 +36,6 @@ model:
     - sedshort      
   load_from_database: True
   DIMR_dflowfm_workdir: . #DIMR dflowfm working dir
-  #use_last_output: True   # use last output for netcdf variables excluded from database
 variables: 
   automatic: 
     TStart:

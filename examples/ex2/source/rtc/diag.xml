@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Diag xmlns="http://www.wldelft.nl/fews/PI" version="1.2">
+
+  <line description="rtcToolsRuntime: RTC-Tools, version 1.6.1.000d7743e53a9962e4f99ab862cd6fdbc956a628 (GPL2 License)" level="3"/>
+
+  <line description="rtcToolsRuntime: model execution started at 2026-May-09 02:39:54 UTC time" level="3"/>
+
+  <line description="rtcToolsRuntime: simulation period = 1995-01-01 00:00:00 - 1995-01-02 00:00:00, dt[ms] = 60000" level="3"/>
+
+  <line description="rtc tools config: element -general- is obsolete" level="2"/>
+
+  <line description="timeSeriesModel::read(), error - error parsing state_import.xml file" level="1"/>
+
+  <line description="rtcToolsRuntime::rtcToolsRuntime(...) - error - error parsing state_import.xml file" level="1"/>
+
+</Diag>

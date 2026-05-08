@@ -64,9 +64,10 @@ def logger_assert(condition, error_message):
 
 def netcdf_copy(src_netcdf, dst_netcdf, exclude_list): 
     """ copies src_netcdf to dst_netcdf excluding variables in exclude list """
-
-    logger.info('netCDF copy ' + src_netcdf + ' to ' + dst_netcdf + ' ...')
+    logger.info('netCDF copy from: ' + src_netcdf)
+    logger.info('              to: ' + dst_netcdf )
     logger.info('excluding variables '+ ' '.join(exclude_list))
+    logger.info('')
     
     # check that directory exists and otherwise make it
     guaranteedir(os.path.dirname(dst_netcdf))
@@ -113,8 +114,10 @@ def netcdf_copy(src_netcdf, dst_netcdf, exclude_list):
 def netcdf_append(src_netcdf, dst_netcdf, append_list): 
     """ appends variables in exclude list from src_netcdf to dst_netcdf """
 
-    logger.info('netCDF append ' + src_netcdf + ' to ' + dst_netcdf + ' ...')
+    logger.info('netCDF append from: ' + src_netcdf)
+    logger.info('              to:   ' + dst_netcdf )
     logger.info('for variables '+ ' '.join(append_list))
+    logger.info('')
 
     # open files for reading and appending 
     with netCDF4.Dataset(src_netcdf, 'r') as src:
