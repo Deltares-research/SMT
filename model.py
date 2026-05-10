@@ -521,7 +521,7 @@ def adapt(model_settings, smt_settings):
                 if 'DIMR_dflowfm_workdir' in smt_settings['model']:
                     new_restart_file = os.path.join('output',
                                                     'work',
-                                                    f'{model_settings['DIMR_dflowfm_workdir']}',
+                                                    f"{model_settings['DIMR_dflowfm_workdir']}",
                                                     f"{model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')}")
                 else:
                     new_restart_file = os.path.join('output',
@@ -535,12 +535,12 @@ def adapt(model_settings, smt_settings):
                     if 'DIMR_dflowfm_workdir' in smt_settings['model']:
                         last_output_restart_file = os.path.join('output', 
                                                                 f'{model_settings["TimeIndex"] - 1}', 
-                                                                f'{model_settings['DIMR_dflowfm_workdir']}',
-                                                                f'{model_settings['OutputDir']}',
+                                                                f"{model_settings['DIMR_dflowfm_workdir']}",
+                                                                f"{model_settings['OutputDir']}",
                                                                 f'{restart_file_name}')
                         new_restart_file = os.path.join('output',
                                                         'work',
-                                                        f'{model_settings['DIMR_dflowfm_workdir']}',
+                                                        f"{model_settings['DIMR_dflowfm_workdir']}",
                                                         f"{model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}')}")
                     else:
                         last_output_restart_file = os.path.join('output', 
