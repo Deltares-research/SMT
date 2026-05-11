@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rtcRuntimeConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rtc="http://www.wldelft.nl/fews" xmlns="http://www.wldelft.nl/fews" xsi:schemaLocation="http://www.wldelft.nl/fews C:\checkouts\river_course\exercises\day4\r038\rtc\rtcRuntimeConfig.xsd">
+  <period>
+    <userDefined>
+      <startDate date="1995-01-01" time="00:00:00" />
+      <endDate date="1995-01-02" time="00:00:00" />
+      <timeStep unit="minute" multiplier="1" divider="1" />
+    </userDefined>
+  </period>
+  <mode>
+    <simulation>
+      <limitedMemory>true</limitedMemory>
+    </simulation>
+  </mode>
+</rtcRuntimeConfig>

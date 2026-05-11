@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rtcDataConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rtc="http://www.wldelft.nl/fews" xmlns="http://www.wldelft.nl/fews" xsi:schemaLocation="http://www.wldelft.nl/fews C:\checkouts\river_course\exercises\day4\r038\rtc\rtcDataConfig.xsd">
+  <importSeries>
+    <timeSeries id="[Input]903.00_WA/water_level">
+      <OpenMIExchangeItem>
+        <elementId>903.00_WA</elementId>
+        <quantityId>water_level</quantityId>
+        <unit>m</unit>
+      </OpenMIExchangeItem>
+    </timeSeries>
+  </importSeries>
+  <exportSeries>
+    <CSVTimeSeriesFile decimalSeparator="." delimiter="," adjointOutput="false"></CSVTimeSeriesFile>
+    <PITimeSeriesFile>
+      <timeSeriesFile>timeseries_export.xml</timeSeriesFile>
+      <useBinFile>false</useBinFile>
+    </PITimeSeriesFile>
+    <timeSeries id="[Output]Structure01/CrestLevel">
+      <OpenMIExchangeItem>
+        <elementId>Structure01</elementId>
+        <quantityId>CrestLevel</quantityId>
+        <unit>m</unit>
+      </OpenMIExchangeItem>
+    </timeSeries>
+    <timeSeries id="[IP]Control Group 1/PID Rule" />
+    <timeSeries id="[DP]Control Group 1/PID Rule" />
+  </exportSeries>
+</rtcDataConfig>
