@@ -1,0 +1,212 @@
+# Generated on 08:52:12, 08-02-2026
+# 1.2.184.54acf90763a9df243a522c9aebc1591edcc7d8ea
+# Source:main
+
+[General]
+Program                                   = D-Flow FM           # Program
+Version                                   = 1.2.184.54acf90763a9df243a522c9aebc1591edcc7d8ea# Version number of computational kernel
+fileType                                  = modelDef            # File type. Do not edit this.
+fileVersion                               = 1.09                # File format version (do not edit this)
+ModelSpecific                             =                                                                 # Optional 'model specific ID', to enable certain custom runtime function calls (instead of via MDU name).
+PathsRelativeToParent                     = 1                   # Default: 0. Whether or not (1/0) to resolve file names (e.g. inside the *.ext file) relative to their direct parent, instead of to the toplevel MDU working dir.
+ConvertLongCulverts                       = 0                   # Default: 0. Wheter or not to convert long culvert input to 1D2D long culverts
+
+[geometry]
+NetFile                                   = ${GridFile}         # Unstructured grid file *_net.nc
+GridEnclosureFile                         =                     # Enclosure file to clip outer parts from the grid *.pol
+DryPointsFile                             =                     # Dry points file *.xyz (third column dummy z values), or dry areas polygon file *.pol (third column 1/-1: inside/outside)
+WaterLevIniFile                           =                     # Initial water levels sample file *.xyz using flood fill algorithm
+LandBoundaryFile                          =                     # Land boundaries file *.ldb, used for visualization
+ThinDamFile                               =                     # Polyline file *_thd.pli, containing thin dams
+Cutcelllist                               =                     # File with names of cutcell polygons, e.g. cutcellpolygons.lst
+FixedWeirFile                             =                     # Polyline file *_fxw.pliz, containing fixed weirs with rows x, y, crest level, left ground level, right ground level
+PillarFile                                =                     # Polyline file *_pillar.pliz, containing four colums with x, y, diameter and Cd coefficient
+Gulliesfile                               =                     # Polyline file *_gul.pliz, containing lowest bed level along talweg x, y, z level
+Roofsfile                                 =                     # Polyline file *_rof.pliz, containing roofgutter heights x, y, z level
+ProflocFile                               =                     # Channel profile location file *_proflocation.xyz with rows x, y, z, profile number ref
+ProfdefFile                               =                     # Channel profile definition file *_profdefinition.def with definition for all profile numbers
+ProfdefxyzFile                            =                     # Channel profile definition file _profdefinition.def with definition for all profile numbers
+IniFieldFile                              =                     # Initial values and parameter fields file
+UseCaching                                = 1                   # Use caching for geometrical/network-related items (0: no, 1: yes)
+Uniformwidth1D                            = 2.                  # Uniform width for channel profiles not specified by profloc
+Uniformtyp1Dstreetinlets                  = -2                  # Uniform type street inlets
+Uniformtyp1Droofgutterpipes               = -2                  # Uniform type roof gutter pipes
+Dxwuimin2D                                = 0.                  # Smallest fraction dx/wu, set dx > Dxwuimin2D*wu.
+PipeFile                                  =                     # File *.pliz containing pipe-based 'culverts'
+ShipdefFile                               =                     # File *.shd containing ship definitions
+WaterLevIni                               = 1.                  # Initial water levels sample file *.xyz using flood fill algorithm
+BedlevUni                                 = 0.                 # Uniform bed level used at missing z values if BedlevType > 2
+BedlevType                                = 1                   # Bathymetry specification
+                                                                # 1: at cell centers (from Net/IniFieldFile)
+                                                                # 2: at faces (from IniFieldFile)
+                                                                # 3: at nodes, face levels mean of node values
+                                                                # 4: at nodes, face levels min. of node values
+                                                                # 5: at nodes, face levels max. of node values
+                                                                # 6: at nodes, face levels max. of cell-center values
+PartitionFile                             =                     # Domain partition polygon file *_part.pol for parallel run
+AngLat                                    = 0.                  # Angle of latitude S-N [deg], 0 = on Equator (and thus no Coriolis force). Only required for Coriolis on Cartesian grids and for heat flux modelling.
+AngLon                                    = 0.                  # Angle of longitude E-W [deg], 0 = Greenwich Mean Time. Only required for heat flux modelling.
+Conveyance2D                              = -1                   # -1: R=HU,0: R=H, 1: R=A/P, 2: K=analytic-1D conv, 3: K=analytic-2D conv
+Slotw2D                                   = 0.                  # -
+Dpuopt                                    = 1                   # Bed level interpolation at velocity point in case of tile approach bed level: 1 = max (default); 2 = mean
+ExtrBl                                    = 0                   # Extrapolation of bed level at boundaries according to the slope: 0 = no extrapolation (default); 1 = extrapolate.
+calculateBedLevelOverNonActiveLinks       = 0                   # Calculate the bed level, using the non active links in the network as well.
+
+[numerics]
+CFLMax                                    = 0.7                 # Maximum Courant number
+AdvecType                                 = 33                  # Advection type (0: none, 1: Wenneker, 2: Wenneker q(uio-u), 3: Perot q(uio-u), 4: Perot q(ui-u), 5: Perot q(ui-u) without itself), 33: as 3 using links (faster)
+AdvecCorrection1D2D                       = 0                   # Advection correction of 1D2D link volume (0: regular advection, 1: link volume au*dx, 2: advection on 1D2D switched off.
+TimeStepType                              = 2                   # Time step handling (0: only transport, 1: transport + velocity update, 2: full implicit step-reduce, 3: step-Jacobi, 4: explicit)
+Icoriolistype                             = 5                   # 0 = No Coriolis force, 5 = default approach for Coriolis (depth-dependent and similar to Delft3D-FLOW).
+Newcorio                                  = 1                   # 0=prior to 27-11-2019, 1=no normal forcing on open bnds, plus 12 variants )
+Limtypmom                                 = 4                   # Limiter type for cell center advection velocity (0: none, 1: minmod, 2: van Leer, 3: Koren, 4: monotone central)
+Limtypsa                                  = 4                   # Limiter type for salinity transport (0: none, 1: minmod, 2: van Leer, 3: Koren, 4: monotone central)
+TransportAutoTimestepdiff                 = ${TransportAutoTimestepdiff}                   # Auto Timestepdiff in Transport, 0 : lim diff, no lim Dt_tr, 1 : no lim diff, lim Dt_tr, 2: no lim diff, no lim Dt_tr, 3=implicit (only 2D)
+DiagnosticTransport                       = 0                   # Diagnostic ("frozen") transport (0: prognostic transport, 1: diagnostic transport)
+Vertadvtypmom                             = 6                   # Vertical advection type in momentum equation; 3: Upwind implicit, 6: centerbased upwind explicit.
+Zlayercenterbedvel                        = 1                   # reconstruction of center velocity at half closed bedcells (0=no, 1: copy bed link velocities)
+Structurelayersactive                     = 1                   # 0=structure flow through all layers, 1=structure flow only through open layers
+Icgsolver                                 = 4                   # Solver type (1: sobekGS_OMP, 2: sobekGS_OMPthreadsafe, 3: sobekGS, 4: sobekGS + Saadilud, 5: parallel/global Saad, 6: parallel/Petsc, 7: parallel/GS)
+LogSolverConvergence                      = 0                   # 1: Log time step, number of solver iterations and solver residual.
+Tlfsmo                                    = 0.                  # Fourier smoothing time (s) on water level boundaries
+Logprofkepsbndin                          = 0                   # inflow: 0=0 keps, 1 = log keps inflow, 2 = log keps in and outflow
+Slopedrop2D                               = 0.                  # Apply drop losses only if local bed slope > Slopedrop2D, (<=0: no drop losses)
+Drop1D                                    = 0                   # Apply drop losses in 1D (0: no, 1:yes)
+cstbnd                                    = 0                   # Delft-3D type velocity treatment near boundaries for small coastal models (1: yes, 0: no)
+Epshu                                     = 1.d-4               # Threshold water depth for wet and dry cells
+jaupwindsrc                               = 1                   # 1st-order upwind advection at sources/sinks (1) or higher-order (0)
+jasfer3D                                  = 1                   # corrections for spherical coordinates
+PerotType                                 = 1
+PerotWeightUpdate                         = 0                   # Perot weight update for 1D nodes (0: no (default), 1: yes)
+PillarFarFieldVelocity                    = 0                   # Use far-field velocity for pillars and dikes (0: no (default), 1: yes)
+FlowSolver                                = generic1d2d3d       # Flow solver.
+Numlimdt_baorg                            = 0                   # if previous numlimdt > Numlimdt_baorg keep original cell area ba in cutcell
+
+[physics]
+unifFrictCoef                             = 2.3d-2              # Uniform friction coefficient [the unit depends on unifFrictType].
+unifFrictType                             = 1                   # Uniform friction type (0: Chezy, 1: Manning, 2: White-Colebrook, 3: White-Colebrook in WAQUA)
+unifFrictCoef1D                           = 2.3d-2              # Uniform friction coefficient in 1D links [the unit depends on unifFrictType].
+unifFrictCoef1D2D                         = 2.3d-2              # Uniform friction coefficient in 1D2D links [the unit depends on unifFrictType].
+unifFrictCoefLin                          = 0.                  # Uniform linear friction coefficient
+unifFrictCoef1DgrLay                      = 5.d-2               # Uniform ground layer friction coefficient for ocean models (m/s) (0: no friction)
+Vicouv                                    = 1                 # Uniform horizontal eddy viscosity (m2/s)
+Dicouv                                    = 1                 # Uniform horizontal eddy diffusivity (m2/s)
+SchmidtNumberSalinity                     = 0.7                 # Turbulent Schmidt number for salinity
+PrandtlNumberTemperature                  = 0.7                 # Turbulent Prandtl number for temperature
+SchmidtNumberTracer                       = 1.0                 # Turbulent Schmidt number for tracer(s)
+Smagorinsky                               = 0.2                 # Smagorinsky factor in horizontal turbulence, e.g. 0.15
+Elder                                     = 0.                  # Elder factor in horizontal turbulence
+irov                                      = 0                   # 0=free slip, 1 = partial slip using wall_ks
+wall_ks                                   = 0.                  # Wall roughness type (0: free slip, 1: partial slip using wall_ks)
+Rhomean                                   = 1000.               # Average water density (kg/m3)
+Idensform                                 = 2                   # Density calulation (0: uniform, 1: Eckart, 2: UNESCO, 3: UNESCO83)
+thermobaricity                            = 0                   # Include pressure effects on water density. Only works for idensform = 3 (UNESCO83).
+thermobaricityInPressureGradient          = 0                   # Apply thermobaricity in computing the baroclinic pressure gradient (0 = no, 1 = yes).
+Ag                                        = 9.81                # Gravitational acceleration
+TidalForcing                              = 1                   # Tidal forcing, if jsferic=1 (0: no, 1: yes)
+SelfAttractionLoading                     = 0                   # Self attraction and loading (0=no, 1=yes, 2=only self attraction)
+SelfAttractionLoading_correct_wl_with_ini = 0                   # correct water level with initial water level in Self attraction and loading (0=no, 1=yes)
+ITcap                                     = 0.                  # Upper limit on internal tides dissipation (W/m^2)
+VillemonteCD1                             = 1.                  # Calibration coefficient for Villemonte. Default = 1.0.
+VillemonteCD2                             = 10.                 # Calibration coefficient for Villemonte. Default = 10.0.
+Salinity                                  = 0                   # Include salinity, (0: no, 1: yes)
+Temperature                               = 0                   # Include temperature (0: no, 1: only transport, 3: excess model of D3D, 5: composite (ocean) model)
+NFEntrainmentMomentum                     = 0                   # 1: Switch on momentum transfer in NearField related entrainment
+SecondaryFlow                             = 0                   # Secondary flow (0: no, 1: yes)
+
+[wind]
+ICdtyp                                    = 2                   # Wind drag coefficient type (1: Const, 2: Smith&Banke (2 pts), 3: S&B (3 pts), 4: Charnock 1955, 5: Hwang 2005, 6: Wuest 2005, 7: Hersbach 2010 (2 pts), 8: Charnock+viscous, 9: Garratt 1977).
+Cdbreakpoints                             = 6.3d-4 7.23d-3      # Wind drag coefficient break points
+Windspeedbreakpoints                      = 0. 100.             # Wind speed break points (m/s)
+Windhuorzwsbased                          = 0                   # Wind hu or zws based , 0 = hu, 1 = zws
+Rhoair                                    = 1.2                 # Air density (kg/m3)
+PavBnd                                    = 0.                  # Average air pressure on open boundaries (N/m2) (only applied if > 0)
+Pavini                                    = 0.                  # Average air pressure for initial water level correction (N/m2) (only applied if > 0)
+
+[Time]
+refDate                                   = 20010101            # Reference date (yyyymmdd)
+tZone                                     = 0.                  # Time zone assigned to input time series
+dtUser                                    = ${dtUser}           # Time interval (s) for external forcing update
+dtNodal                                   = 21600.              # Time interval (s) for updating nodal factors in astronomical boundary conditions
+dtMax                                     = ${dtMax}                 # Maximum computation timestep (s)
+dtFacMax                                  = 1000.               # Max timestep increase factor ( )
+dtInit                                    = 1.                  # Initial computation timestep (s)
+timeStepAnalysis                          = 0                   # 0=no, 1=see file *.steps
+tUnit                                     = S                   # Time unit for start/stop times (D, H, M or S)
+tStart                                    = 60.                 # Start time w.r.t. refDate (in tUnit)
+tStop                                     = 300.                # Stop time w.r.t. refDate (in tUnit)
+tStartTlfsmo                              = 0.                  # Start time for smoothing boundary conditions (Tlfsmo) w.r.t. refDate (in tUnit)
+
+[restart]
+RestartFile                               =                     # Restart netcdf-file, either *_rst.nc or *_map.nc
+RestartDateTime                           =                     # Restart date and time (yyyymmddhhmmss) when restarting from *_map.nc
+RstIgnoreBl                               = 0                   # Flag indicating whether bed level from restart should be ignored (0=no (default), 1=yes)
+
+[external forcing]
+ExtForceFile                              = ${ExtForceFile}     # Old format for external forcings file *.ext, link with tim/cmp-format boundary conditions specification
+ExtForceFileNew                           =                     # New format for external forcings file *.ext, link with bc-format boundary conditions specification
+
+[output]
+OutputDir                                 = dflowfmoutput                     # Output directory of map-, his-, rst-, dat- and timings-files, default: DFM_OUTPUT_<modelname>. Set to . for current dir.
+FlowGeomFile                              =                     # Flow geometry NetCDF *_flowgeom.nc
+ObsFile                                   =                     # Points file *.xyn with observation stations with rows x, y, station name
+DeleteObsPointsOutsideGrid                = 0                   # 0 - do not delete, 1 - delete
+CrsFile                                   =                     # Polyline file *_crs.pli defining observation cross sections
+RugFile                                   =                     # Polyline file *_rug.pli defining runup gauges
+FouFile                                   =                     # Fourier analysis input file *.fou
+FouUpdateStep                             = 0                   # Fourier update step type: 0=every user time step, 1=every computational timestep, 2=same as history output.
+HisFile                                   =                     # HisFile name *_his.nc
+MapFile                                   =                     # MapFile name *_map.nc
+HisInterval                               = 240. 60. 300.       # History times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period
+XLSInterval                               = 0.             # Interval (s) XLS history
+MapInterval                               = 240. 60. 300.          # Map times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period
+RstInterval                               = 86400. 0. 0.        # Restart times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period
+MbaInterval                               = 240. 60. 300.       # Mass balance area output interval (s)
+MbaWriteTxt                               = 1                   # Write mass balance area output to a txt-file (1: yes, 0: no)
+MbaWriteCsv                               = 0                   # Write mass balance area output to a csv-file (1: yes, 0: no)
+MbaWriteNetCDF                            = 1                   # Write mass balance area output to a netCDF-file (1: yes, 0: no)
+MbaLumpFromToMba                          = 0                   # Lump MBA from/to other areas mass balance terms (1: yes, 0: no)
+MbaLumpBoundaries                         = 0                   # Lump MBA boundary mass balance terms (1: yes, 0: no)
+MbaLumpSourceSinks                        = 0                   # Lump MBA source/sink mass balance terms (1: yes, 0: no)
+MbaLumpProcesses                          = 0                   # Lump MBA processes mass balance terms (1: yes, 0: no)
+WaqOutputDir                              =                     # Output directory of WAQ communication files (flowgeom, vol, flo, etc.), default: DFM_DELWAQ_<modelname>. Set to . for current dir.
+WaqInterval                               = 0. 0. 0.            # DELWAQ output times, given as "interval" "start period" "end period" (s)
+WaqHorAggr                                =                     # DELWAQ output horizontal aggregation file (*.dwq)
+WaqVertAggr                               =                     # DELWAQ output vertical aggregation file (*.vag)
+ClassMapInterval                          = 0. 0. 0.            # Class map times (s), interval, starttime, stoptime (s), if starttime, stoptime are left blank, use whole simulation period
+ClassMapFile                              =                     # ClassMapFile name *_clm.nc
+StatsInterval                             = -60.                # Screen step output interval in seconds simulation time, if negative in seconds wall clock time
+TimingsInterval                           = 0.                  # Timings statistics output interval
+TimeSplitInterval                         = 0 s                 # Time splitting interval, after which a new output file is started. value+unit, e.g. '1 M', valid units: Y,M,D,h,m,s.
+MapFormat                                 = 4                   # Map file format, 1: NetCDF, 4: NetCDF-UGRID
+NcFormat                                  = 3                   # Format for all NetCDF output files (3: classic, 4: NetCDF4+HDF5)
+NcMapDataPrecision                        = double              # Precision for NetCDF data in map files (double or single)
+NcHisDataPrecision                        = double              # Precision for NetCDF data in his files (double or single)
+NcCompression                             = 0                   # Whether to apply compression (1 = yes, 0 = no) to the Map (*_map.nc) and Fourier (*_fou.nc) output files. NOTE: This option only works when NcFormat = 4
+GenerateUUID                              = 1                   # Generate UUID as unique dataset identifier and include in output NetCDF files.
+Wrimap_wet_waterdepth_threshold           = 2.d-5               # Waterdepth threshold above which a grid point counts as 'wet'. Used for Wrimap_time_water_on_ground.
+Writepart_domain                          = 1                   # Write partition domain info. for postprocessing
+WriteDFMinterpretedvalues                 = 0                   # Write DFMinterpretedvalues (1: yes, 0: no)
+WriteDetailedTimers                       = 0                   # Write detailed timers output file (1: yes, 0: no)
+MapOutputTimeVector                       =                     # File (*.mpt) containing fixed map output times (s) w.r.t. RefDate
+FullGridOutput                            = 0                   # Output mode for layer positions on map-file (0: static layer positions, 1: time- and space-varying grid layer data, 2: time- and space-varying grid layer data with CF-bounds)
+EulerVelocities                           = 0                   # Euler velocities output (0: GLM, 1: Euler velocities)
+Wrirst_bnd                                = 1                   # Write waterlevel, bedlevel and coordinates of boundaries to restart files
+Writek_CdWind                             = 1                   # Write wind friction coeffs to tek file (1: yes, 0: no)
+wrimap_every_dt = 0
+
+[processes]
+SubstanceFile                             =                     # substance file
+AdditionalHistoryOutputFile               =                     # extra history output file
+StatisticsFile                            =                     # statistics file
+DtProcesses                               = 0.                  # waq processes time step
+VolumeDryThreshold                        = 1.d-3               # Volume below which segments are marked as dry. (m3)
+DepthDryThreshold                         = 1.d-3               # Water depth below which segments are marked as dry. (m)
+SubstanceDensityCoupling                  = 0                   # Substance density coupling (1: yes, 0: no). It only functions correctly when all substances are sediments.
+
+[sediment]
+sedimentmodelnr = 0
+sedfile = 
+morfile = 
+MorCFL = 0
+

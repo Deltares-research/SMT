@@ -160,5 +160,5 @@ cython_debug/
 #.idea/
 .vscode/launch.json
 examples/ex1/central_database
-examples/ex1/local_database
-examples/ex1/output
+examples/*/local_database
+examples/*/output

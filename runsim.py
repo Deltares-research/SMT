@@ -29,7 +29,7 @@ def print_version(ctx, param, value):
     # MAJOR version when you make incompatible API changes
     # MINOR version when you add functionality in a backward compatible manner
     # PATCH version when you make backward compatible bug fixes
-    click.echo(f'SMT version 2.2.2 (git commit: {git_version})')
+    click.echo(f'SMT version 2.2.3 (git commit: {git_version})')
 
     # Print versions of dependencies
     click.echo('--dependencies---')

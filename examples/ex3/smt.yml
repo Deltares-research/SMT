@@ -1,0 +1,88 @@
+info:
+  created_by: Willem Ottevanger
+  date: 2020-04-28 16:49:36
+  version: 1
+application: 
+  name: D-FlowFM 
+  command: 
+    Windows: 
+      - start_dimr.bat
+    Linux: 
+      - run_dflowfm.sh 
+  flags: 
+    Windows: 
+    Linux: 
+      - -v 
+      - 1.2.98.66318
+  input: # These files are not renamed
+    - .mdu
+    - .xml
+model: 
+  input: masscon
+  simulation_type: simulation-list 
+#  exclude_from_database:  # netcdf variables to be excluded from database
+#    - time
+#    - FlowElem_bl
+#    - mor_bl
+#    - bl_bnd 
+#    - bodsed
+#    - lyrfrac
+#    - morft
+#    - thlyr
+#    - msed
+#    - mesh1d_mor_crs_n
+#    - mesh1d_mor_crs_z
+#    - preload         
+#    - sedshort      
+  load_from_database: False
+  DIMR_dflowfm_workdir: '.'  #DIMR dflowfm working dir
+#  DIMR_rtc_workdir: 'rtc' #DIMR rtc working dir
+variables: 
+  automatic: 
+#     TStart:
+#     TStop:
+#     MapInterval:
+#     RstInterval:
+#     RestartFile: 
+#     RestartDateTime:
+#     #MorStt:
+#     RstIgnoreBl:
+  user:   
+     from_file: input.csv
+#    TUnit: S
+#    ReferenceDate: '19950101'   # yyyymmdd
+#    SpinupTime: 
+#      - 10   # 0: flow field from local database - minor adjustment needed
+#      - 10   # 1: flow field from central database - significant adjustment may be needed 
+#      - 30   # 2: Starting from final result of last simulation - long adjustment needed 
+#      - 30   # 3: no restart file - long adjustment needed (cold-start startup)
+#    UseTlfsmo: 0  # 0: do not use Tlfsmo (sets Tlfsmo=0.0), 1: use Tlfsmo specified, 2: (set to 50% of SpinupTime)
+#    Tlfsmo: 0.0  # Fourier smoothing time on boundaries (s) 
+#    DtMax: 10.                 # Maximal computation timestep (s)
+#    Dtfacmax: 1.1                 # Max timestep increase factor ( )
+#    DtInit: 1.                  # Initial computation timestep (s)
+#     DtUser: 240
+#    HisIntervalStep: 1.0  # Will be adjusted according to determined DtUserModel
+#    LandBoundaryFile: '../../../geometry/Waal_land_boundary.ldb'                                      # Land boundaries file *.ldb, used for visualization
+#    ThinDamFile: '../../../geometry/WL_cut_thin_dams_thd.pli'                                         # Polyline file *_thd.pli, containing thin dams
+#    FixedWeirFile: '../../../geometry/WL_cut_fixed_weirs_fxw.pliz'                                    # Polyline file *_fxw.pliz, containing fixed weirs with rows x, y, crest level, left ground level, right ground level
+#    PillarFile: ''                                                                                    # Pol'yline file *.pliz, containing bridge pillars with rows x, y, drag coefficient and diameter
+#    StructureFile: '../../../geometry/Waal_structures.ini'           
+#    ObsFile: '../../../monitoring/WL_cut_observation_points_obs.xyn'                                  # Points file *.xyn with observation stations with rows x, y, station name    Waterlevel:       # Discharge dependent MorFac
+#    CrsFile: '../../../monitoring/Waal_crs.pli'                                                       # Polyline file *_crs.pli defining observation cross sections      
+#    IniFieldFile: '../../../initial/initialFields.ini'
+#    Discharge: 
+#      Waterlevel:
+#       - 4: 2000
+#       - 5: 3000
+#       - 6: 4000
+#       - 7: 6000
+#       - 8: 10000
+#    Discharge: 
+#      TimeDuration: # TimeDuration dependent Discharge - formerly QSeries file [- TUnits: Discharge]
+#      - 360: 2000
+#      - 360: 10000
+#      - 360: 4000
+#      - 360: 2000
+#    OutputDir: 'dflowfmoutput' # Output Directory
+#    RTC_initial_state: 'initial\rtc\state_import.xml' # relative to top-level folder where smt.yml lives.

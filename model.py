@@ -122,6 +122,9 @@ def set_input(smt_settings, time_index):
         if 'from_file' not in user_vars:
             logger.critical(f'User variable `from_file` not found')
             raise ValueError
+        if not os.path.exists(smt_user['from_file']): 
+            logger.critical(f'File from_file {smt_user["from_file"]} not found')
+            raise FileNotFoundError
         df = pd.read_csv(smt_user['from_file'])
         df.rename(columns = dict(zip(df.keys(),list(s.strip() for s  in df.keys()))), inplace=True)
         if time_index in df.index: 
