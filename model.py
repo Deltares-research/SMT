@@ -233,6 +233,8 @@ def get_input(smt_settings):
                     restart_file_database = os.path.join(smt_settings['model']['DIMR_dflowfm_workdir'],
                                                          restart_file_database)
                 if 'DIMR_rtc_workdir' in smt_settings['model']:
+                    if len(smt_settings['model']['DIMR_rtc_workdir']) > 0:
+                        smt_settings['model']['use_rtc'] = True
                     if 'RTC_input_file' not in model_settings.keys():
                         model_settings['RTC_input_file'] = 'state_import.xml'
                     if 'RTC_output_file' not in model_settings.keys():
@@ -241,13 +243,17 @@ def get_input(smt_settings):
                     rtc_file = f'{rtc_file_base}{file_append}{rtc_file_ext}'
                     rtc_file_location = os.path.join(smt_settings['model']['DIMR_rtc_workdir'],
                                                      rtc_file)
+                else: 
+                    smt_settings['model']['use_rtc'] = False
+                    smt_settings['model']['DIMR_rtc_workdir'] = ''
+                    model_settings['DIMR_rtc_workdir'] = ''
                 # Ignore database option
                 if smt_settings['model']['load_from_database'] == False: 
                     logger.info('Cold startup - (neglecting restart information)')
                     model_settings['RestartFileFromBackupLocation'] = '' # None ?
                     model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',
                                                                                  restart_file_database)
-                    if 'DIMR_rtc_workdir' in smt_settings['model']:
+                    if smt_settings['model']['use_rtc']:
                         model_settings['RTCFileLocation'] = rtc_file_location
                         model_settings['RTCFileFromBackupLocation'] = model_settings['RTC_initial_state']
                         model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',
@@ -263,7 +269,7 @@ def get_input(smt_settings):
                                                                                  restart_file_database)
                     if time_index == 0: 
                         model_settings['RstIgnoreBl'] = 1
-                    if 'DIMR_rtc_workdir' in smt_settings['model']:
+                    if smt_settings['model']['use_rtc']:
                         model_settings['RTCFileLocation'] = rtc_file_location
                         model_settings['RTCFileFromBackupLocation'] = os.path.join('local_database',
                                                                                    rtc_file_location)
@@ -280,7 +286,7 @@ def get_input(smt_settings):
                                                                                      restart_file_database)
                         if time_index == 0: 
                             model_settings['RstIgnoreBl'] = 1
-                        if 'DIMR_rtc_workdir' in smt_settings['model']:
+                        if smt_settings['model']['use_rtc']:
                             model_settings['RTCFileLocation'] = rtc_file_location
                             model_settings['RTCFileFromBackupLocation'] = os.path.join('central_database',
                                                                                        rtc_file_location)
@@ -296,7 +302,7 @@ def get_input(smt_settings):
                             model_settings['RestartFileFromBackupLocation'] = '' 
                             model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',
                                                                                          restart_file_database)
-                            if 'DIMR_rtc_workdir' in smt_settings['model']:
+                            if smt_settings['model']['use_rtc']:
                                 model_settings['RTCFileLocation'] = rtc_file_location
                                 model_settings['RTCFileFromBackupLocation'] = ''
                                 model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',
@@ -311,7 +317,7 @@ def get_input(smt_settings):
                             model_settings['RestartFileFromBackupLocation'] = '' # None ?
                             model_settings['RestartFileToBackupLocation'] = os.path.join('local_database',
                                                                                          restart_file_database)
-                            if 'DIMR_rtc_workdir' in smt_settings['model']:
+                            if smt_settings['model']['use_rtc']:
                                 model_settings['RTCFileLocation'] = rtc_file_location
                                 model_settings['RTCFileFromBackupLocation'] = model_settings['RTC_initial_state'] 
                                 model_settings['RTCFileToBackupLocation'] = os.path.join('local_database',
@@ -459,8 +465,10 @@ def get_input(smt_settings):
                     model_settings['RestartFileLocation'] = model_settings['RestartFile']
                 if 'DIMR_dflowfm_workdir' in smt_settings['model']:
                     model_settings['DIMR_dflowfm_workdir'] = smt_settings['model']['DIMR_dflowfm_workdir']
-                if 'DIMR_rtc_workdir' in smt_settings['model']:
+                if smt_settings['model']['use_rtc']:
                     model_settings['DIMR_rtc_workdir'] = smt_settings['model']['DIMR_rtc_workdir']
+                else:
+                    model_settings['DIMR_rtc_workdir'] = '${DIMR_rtc_workdir} not used'
                 if 'OutputDir' in smt_settings['model']:
                     model_settings['OutputDir'] = smt_settings['model']['OutputDir']
                 model_settings['FileBase'] = head
@@ -499,7 +507,7 @@ def adapt(model_settings, smt_settings):
                 if file_ext == '.sh': 
                     os.chmod(full_filename_new, 0o0777)
     if smt_settings['model']['simulation_type'] == 'quasi-steady-hydrograph':
-        if 'DIMR_rtc_workdir' in smt_settings['model']:
+        if smt_settings['model']['use_rtc']:
             rtc_new_file = os.path.join('output','work',smt_settings['model']['DIMR_rtc_workdir'],model_settings['RTC_input_file'])
 
         head, _ = os.path.splitext(smt_settings['model']['input'])
@@ -556,7 +564,7 @@ def adapt(model_settings, smt_settings):
                     tools.netcdf_append(last_output_restart_file, 
                                         new_restart_file,
                                         smt_settings['model']['exclude_from_database'])
-                    # if 'DIMR_rtc_workdir' in smt_settings['model']:
+                    # if smt_settings['model']['use_rtc']:
                     #     last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
                     #     tools.remove(rtc_new_file)
                     #     tools.copy(last_output_rtc_file, rtc_new_file)                
@@ -581,11 +589,11 @@ def adapt(model_settings, smt_settings):
                                                     model_settings['RestartFileLocation'].replace(head, f'{head}{partition_string}'))
 
                 tools.netcdf_copy(last_output_restart_file, new_restart_file, [])   # copy all data
-                if 'DIMR_rtc_workdir' in smt_settings['model']:
+                if smt_settings['model']['use_rtc']:
                     last_output_rtc_file = [rtc for rtc in glob.glob('output/'+str(model_settings['TimeIndex'] - 1)+'/**/**/state_export.xml', recursive=True)][-1]
                     model_settings['RTCFileFromBackupLocation'] = last_output_rtc_file
             # Copy RTC to correct location.
-            if 'DIMR_rtc_workdir' in smt_settings['model']:
+            if smt_settings['model']['use_rtc']:
                 tools.remove(rtc_new_file)
                 tools.copy(model_settings['RTCFileFromBackupLocation'], rtc_new_file)                            
 
@@ -625,7 +633,7 @@ def finalize(model_settings, smt_settings):
                 raise IndexError
             tools.netcdf_copy(restart_file_database, model_settings['RestartFileToBackupLocation'].replace(head, f'{head}{partition_string}'),  
                 smt_settings['model']['exclude_from_database'])
-            if 'DIMR_rtc_workdir' in smt_settings['model']:
+            if smt_settings['model']['use_rtc']:
                 rtc_file = [rtc for rtc in glob.glob('output/work/**/**/state_export.xml', recursive=True)][-1]
                 tools.copy(rtc_file, model_settings['RTCFileToBackupLocation'])
 
