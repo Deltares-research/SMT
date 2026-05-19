@@ -247,6 +247,8 @@ def get_input(smt_settings):
                     smt_settings['model']['use_rtc'] = False
                     smt_settings['model']['DIMR_rtc_workdir'] = ''
                     model_settings['DIMR_rtc_workdir'] = ''
+                if 'RTC_initial_state' not in model_settings.keys():
+                    model_settings['RTC_initial_state'] = ''
                 # Ignore database option
                 if smt_settings['model']['load_from_database'] == False: 
                     logger.info('Cold startup - (neglecting restart information)')
@@ -408,8 +410,6 @@ def get_input(smt_settings):
                     model_settings['circumcenterMethod'] = 'internalNetlinksEdge' 
                 if 'circumcenterTolerance' not in model_settings.keys():  # geometry options - MAASMOR-217
                     model_settings['circumcenterTolerance'] = '1.0e-3'
-                if 'RTC_initial_state' not in model_settings.keys():
-                    model_settings['RTC_initial_state'] = ''
                 # At this point we have read the desired SpinupTime and TimeDuration of the morphodynamic activity. 
                 # Now we have to find a DtUserModel which is close to the desired DtUser and allows for the setting of different DtUser related outputs
                 #
