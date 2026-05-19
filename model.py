@@ -232,6 +232,7 @@ def get_input(smt_settings):
                 if 'DIMR_dflowfm_workdir' in smt_settings['model']:
                     restart_file_database = os.path.join(smt_settings['model']['DIMR_dflowfm_workdir'],
                                                          restart_file_database)
+                smt_settings['model']['use_rtc'] = False
                 if 'DIMR_rtc_workdir' in smt_settings['model']:
                     if len(smt_settings['model']['DIMR_rtc_workdir']) > 0:
                         smt_settings['model']['use_rtc'] = True
@@ -243,10 +244,6 @@ def get_input(smt_settings):
                     rtc_file = f'{rtc_file_base}{file_append}{rtc_file_ext}'
                     rtc_file_location = os.path.join(smt_settings['model']['DIMR_rtc_workdir'],
                                                      rtc_file)
-                else: 
-                    smt_settings['model']['use_rtc'] = False
-                    smt_settings['model']['DIMR_rtc_workdir'] = ''
-                    model_settings['DIMR_rtc_workdir'] = ''
                 if 'RTC_initial_state' not in model_settings.keys():
                     model_settings['RTC_initial_state'] = ''
                 # Ignore database option
