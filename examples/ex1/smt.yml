@@ -50,9 +50,9 @@ variables:
     ReferenceDate: '20231212'   # yyyymmdd
     SpinupTime: 
       - 10   # 0: flow field from local database - minor adjustment needed
-      - 10   # 1: flow field from central database - significant adjustment may be needed 
+      - 20   # 1: flow field from central database - significant adjustment may be needed 
       - 30   # 2: Starting from final result of last simulation - long adjustment needed 
-      - 30   # 3: no restart file - long adjustment needed (cold-start startup)
+      - 40   # 3: no restart file - long adjustment needed (cold-start startup)
     UseTlfsmo: 0  # 0: do not use Tlfsmo (sets Tlfsmo=0.0), 1: use Tlfsmo specified, 2: (set to 50% of SpinupTime)
     Tlfsmo: 0.0  # Fourier smoothing time on boundaries (s) 
     DtMax: 10.                 # Maximal computation timestep (s)
@@ -72,5 +72,5 @@ variables:
       - 10: 2000
       - 20: 10000
       - 10: 4000
-      - 10: 2000
+      - 15: 2000
     OutputDir: 'dflowfmoutput' # Output Directory

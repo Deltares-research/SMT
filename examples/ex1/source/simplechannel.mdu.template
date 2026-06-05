@@ -265,7 +265,7 @@ Tunit                                     = ${TUnit}            # Time unit for 
  
 [restart]
 RestartFile                               = ${RestartFile}      # Restart netcdf-file, either *_rst.nc or *_map.nc
-RestartDateTime                           = ${RestartDateTime}      # Restart date and time (yyyymmddhhmmss) when restarting from *_map.nc
+RestartDateTime                           =                     # Restart date and time (yyyymmddhhmmss) when restarting from *_map.nc
 
 [external forcing]
 ExtForceFile                              =                                       # Old format for external forcings file *.ext, link with tim/cmp-format boundary conditions specification

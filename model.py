@@ -324,6 +324,7 @@ def get_input(smt_settings):
                             restart_level = 3
                 model_settings['RestartLevel'] = restart_level        
                 model_settings['SpinupTime'] = model_settings['SpinupTime'][restart_level]
+                logger.info(f"Adding spin-up time {model_settings['SpinupTime']} {model_settings['TUnit'].lower()}.")
                 model_settings['TStart'] = time_start
                 if model_settings['TUnit'] == 'S':
                     tunit_in_seconds = 1
@@ -433,6 +434,8 @@ def get_input(smt_settings):
                 if model_settings['UseTlfsmo'] == 0:
                     model_settings['Tlfsmo'] = 0.0
                 model_settings['SpinupTimeModel'] = spinup_time_seconds/tunit_in_seconds
+                if model_settings['SpinupTimeModel'] > model_settings['SpinupTime']: 
+                    logger.info(f"Spin-up time increased to {model_settings['SpinupTimeModel']} {model_settings['TUnit'].lower()} to match dtUser {model_settings['DtUserModel']} s.")
                 model_settings['HisIntervalStepModel'] = np.ceil(model_settings['HisIntervalStep']/model_settings['DtUserModel'])*model_settings['DtUserModel']
                 model_settings['TrtDtModel'] = model_settings['DtUserModel']
 
