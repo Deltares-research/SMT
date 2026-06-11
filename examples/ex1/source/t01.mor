@@ -1,0 +1,43 @@
+[MorphologyFileInformation]
+    FileCreatedBy         = Deltares, FM-Suite DFlowFM Model Version 1.3.0.37667, DFlow FM Version 1.1.192.51191 
+    FileCreationDate      = Thu Jun 22 2017, 14:24:20 
+    FileVersion           = 02.00                  
+[Morphology]
+    MorFac                = 180                    
+    MorStt                = 5                      
+    Thresh                = 0.05                   
+    BedUpd                = 1                      
+    CmpUpd                = 1                      
+    NeuBcMud              = 1                      
+    NeuBcSand             = 1                      
+    DensIn                = 0                      
+    ISlope                = 2                      
+    AlfaBs                = 1                      
+    AlfaBn                = 1.5                    
+    Ashld                 = 0.85                   
+    Bslhd                 = 0.5                    
+    Cshld                 = 0                      
+    Dshld                 = 0                      
+    CoulFri               = 0                      
+    FlFdRat               = 0                      
+    ThetaCr               = 0                      
+    IHidExp               = 1                      
+    ASKLHE                = 1                      
+    MWWJHE                = 1                      
+    Espir                 = 1E-36                  
+    Sus                   = 1                      
+    Bed                   = 1                      
+    SusW                  = 0.5                    
+    BedW                  = 1                      
+    SedThr                = 0.1                    
+    ThetSD                = 0.1                    
+    HMaxTH                = 1.5                    
+    IopKCW                = 1                      
+    FWFac                 = 1.0000000e-001         
+[Output]
+    BedTranspDueToCurrentsAtZeta= true                   
+    VelocAtZeta           = true                   
+    VelocMagAtZeta        = true                   
+    VelocZAtZeta          = true                   
+    ShearVeloc            = true  
+    Percentiles           = 50 90

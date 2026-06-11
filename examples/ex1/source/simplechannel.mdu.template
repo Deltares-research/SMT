@@ -421,3 +421,10 @@ DtMassBalance                             = 0.                  # waq mass balan
 ProcessFluxIntegration                    = 1                   # Process fluxes integration option (1: WAQ, 2: D-Flow FM)
 VolumeDryThreshold                        = 1.d-3
 DepthDryThreshold                         = 1.d-3
+
+[sediment]
+MorFile           = t01.mor             # Morphology settings file (*.mor)
+SedFile           = t01.sed             # Sediment characteristics file (*.sed)
+Sedimentmodelnr   = 4                   # Sediment model nr, (0=no, 1=Krone, 2=SvR2007)
+Nr_of_sedfractions= 1                   # Nr of sediment fractions, (specify the next parameters for each fraction)
+MxgrKrone         = 0                   # Highest fraction index treated by Krone
