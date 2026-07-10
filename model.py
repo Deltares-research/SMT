@@ -405,9 +405,11 @@ def get_input(smt_settings):
                 if 'Wrimap_waterlevel_s0' not in model_settings.keys():  # output options
                     model_settings['Wrimap_waterlevel_s0'] = '0'
                 if 'circumcenterMethod' not in model_settings.keys():  # geometry options - MAASMOR-217
-                    model_settings['circumcenterMethod'] = 'internalNetlinksEdge' 
+                    model_settings['circumcenterMethod'] = 'allNetlinksLoop' 
                 if 'circumcenterTolerance' not in model_settings.keys():  # geometry options - MAASMOR-217
-                    model_settings['circumcenterTolerance'] = '1.0e-3'
+                    model_settings['circumcenterTolerance'] = '1.0e-15'
+                if 'bedformfile' not in model_settings.keys():  
+                    model_settings['bedformfile'] = ''
                 # At this point we have read the desired SpinupTime and TimeDuration of the morphodynamic activity. 
                 # Now we have to find a DtUserModel which is close to the desired DtUser and allows for the setting of different DtUser related outputs
                 #
