@@ -15,7 +15,7 @@ Setup a virtual environment
 $ python -m venv venv
 ```
 
-Activate the environment by the following command on Linux
+Activate the environment by the following command on Linux:
 ```
 $ source venv/bin/activate
 ```
