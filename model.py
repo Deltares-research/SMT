@@ -410,6 +410,8 @@ def get_input(smt_settings):
                     model_settings['circumcenterTolerance'] = '1.0e-15'
                 if 'bedformfile' not in model_settings.keys():  
                     model_settings['bedformfile'] = ''
+                if 'Elder' not in model_settings.keys():  
+                    model_settings['Elder'] = '0'                
                 # At this point we have read the desired SpinupTime and TimeDuration of the morphodynamic activity. 
                 # Now we have to find a DtUserModel which is close to the desired DtUser and allows for the setting of different DtUser related outputs
                 #
